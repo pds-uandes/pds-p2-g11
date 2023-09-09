@@ -2,7 +2,30 @@ import datetime
 
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import AbstractUser
 
+class CustomUser(AbstractUser):
+    USER_TYPE_CHOICES = (
+        (0, 'professor'),
+        (1, 'student'),
+    )
+    user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES)
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name='groups',
+        blank=True,
+        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
+        related_name="%(app_label)s_%(class)s_related",
+        related_query_name="%(app_label)s_%(class)ss",
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name='user permissions',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        related_name="%(app_label)s_%(class)s_related",
+        related_query_name="%(app_label)s_%(class)ss",
+    )
 
 class Question(models.Model):
     def __str__(self):
