@@ -1,19 +1,10 @@
-<<<<<<< HEAD
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
+from django.http import HttpResponse
 
 from .models import Choice, Question
-=======
 from django.shortcuts import get_object_or_404, render, redirect
 
-
-# # Create your views here.
-from django.http import HttpResponse
-from .models import Question
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
->>>>>>> login
 
 def index(request):
     latest_question_list = Question.objects.order_by("-pub_date")[:5]
@@ -30,7 +21,6 @@ def detail(request, question_id):
 
 
 def vote(request, question_id):
-<<<<<<< HEAD
     question = get_object_or_404(Question, pk=question_id)
     
     try:
@@ -57,7 +47,6 @@ def vote(request, question_id):
         "result_message": result_message,
     })
 
-=======
     return HttpResponse("You're voting on question %s." % question_id)
 
 def login_view(request):
@@ -71,4 +60,3 @@ def login_view(request):
         else:
             messages.error(request, 'Invalid username or password.')
     return render(request, 'login.html')
->>>>>>> login
