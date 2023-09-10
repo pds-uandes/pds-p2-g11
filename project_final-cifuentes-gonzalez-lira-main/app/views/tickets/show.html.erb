@@ -1,0 +1,122 @@
+<div class="container">
+  <h1>Ticket details</h1>
+  <%= render partial: 'ticket', locals: { ticket: @ticket, show_view_button: false } %>
+
+
+<h2 class="text-muted">More details:</h2>
+  
+    <div class="card-body">
+      <h5 class="text-muted">User Comments</h5>
+        <div class="card mb-3">
+          <div class="card-body">
+            <% @ticket.comments.each do |comment| %>
+              <% if comment.user.normal? %>
+                <div class="d-flex mb-3">
+                  <div class="flex-shrink-0">
+                  </div>
+                  <div class="flex-grow-1 ms-3">
+                    <h5 class="card-title"><%= comment.user.full_name %></h5>
+                    <p class="card-text"><%= comment.body %></p>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+
+      <% if current_user.normal? %>
+        <%= form_with(model: [ @ticket, Comment.new ]) do |form| %>
+          <div class="mb-3">
+            <%= form.text_area :body, class: 'form-control', placeholder: 'Add a comment...' %>
+          </div>
+          <%= form.submit "Add Comment", class: "btn btn-primary" %>
+        <% end %>
+      <% end %>
+    
+  </div>
+
+  <% if current_user.admin? || current_user.executive? || current_user.supervisor? %>
+    <h5 class="text-muted">Priority</h5>
+    <div class="card mb-3">
+      <div class="card-body">
+        <%= form_with(model: @ticket, local: true) do |form| %>
+          <div class="mb-3">
+            <%= form.label :priority %>
+            <%= form.select :priority, options_for_select([['Low', 'low'], ['Medium', 'medium'], ['High', 'high'],['Urgent', 'urgent']], @ticket.priority), {}, class: 'form-select' %>
+          </div>
+          <%= form.submit "Update Priority", class: "btn btn-primary" %>
+        <% end %>
+      </div>
+    </div>
+
+    <h5 class="text-muted">Tags</h5>
+    <div class="card mb-3">
+      <div class="card-body">
+        <% @ticket.tags.each do |tag| %>
+          <span class="badge bg-secondary"><%= tag.name %></span>
+        <% end %>
+      </div>
+    </div>
+
+    <%= form_with(url: add_tag_ticket_path(@ticket), method: :post) do |form| %>
+      <div class="mb-3">
+        <%= form.text_field :name, class: 'form-control', placeholder: 'Add a tag...' %>
+      </div>
+      <%= form.submit "Add Tag", class: "btn btn-primary" %>
+    <% end %>
+
+ <% if current_user.supervisor? || current_user.admin? %>
+  <%= form_with(model: @ticket) do |form| %>
+    <div class="mb-3">
+      <%= form.label :executive_user_id, "Executive User", class: 'form-label' %>
+      <%= form.collection_select :executive_user_id, User.executive, :id, :full_name, {}, class: 'form-control' %>
+    </div>
+    <%= form.submit "Change Executive", class: 'btn btn-primary' %>
+  <% end %>
+<% end %>
+
+
+
+
+
+    <h5 class="text-muted">Staff Comments</h5>
+    <div class="card mb-3">
+      <div class="card-body">
+        <% @ticket.comments.each do |comment| %>
+          <% unless comment.user.normal? %> 
+            <div class="d-flex mb-3">
+              <div class="flex-shrink-0">
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <h5 class="card-title"><%= comment.user.full_name %></h5>
+                <p class="card-text"><%= comment.body %></p>
+              </div>
+            </div>
+          <% end %> 
+        <% end %>
+      </div>
+    </div>
+
+    <%= form_with(model: [ @ticket, Comment.new ]) do |form| %>
+      <div class="mb-3">
+        <%= form.text_area :body, class: 'form-control', placeholder: 'Add a comment...' %>
+      </div>
+      <%= form.submit "Add Comment", class: "btn btn-primary" %>
+    <% end %>
+
+  <% end %> 
+
+  <% if @ticket.images.attached? %> 
+    <h5 class="text-muted">Images</h5> 
+    <div class="card mb-3"> 
+      <div class="card-body"> 
+        <% @ticket.images.each do |image| %> 
+          <%= image_tag image, class: 'img-fluid' %> 
+        <% end %> 
+      </div> 
+    </div> 
+  <% end %> 
+
+  
+</div>  

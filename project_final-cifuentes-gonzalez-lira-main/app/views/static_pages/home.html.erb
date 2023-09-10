@@ -1,0 +1,12 @@
+<div class="container mt-3">
+  <h1 class="mb-3">Home</h1>
+  <% if current_user.normal? || current_user.executive? %>
+    <%= link_to 'View Tickets', tickets_path, class: 'btn btn-primary me-2' %>
+  <% end %>
+  <% if current_user.normal? %>
+    <%= link_to 'Create Ticket', new_ticket_path, class: 'btn btn-secondary me-2' %>
+  <% elsif current_user.admin? || current_user.supervisor? %>
+    <%= link_to 'View Users', users_path, class: 'btn btn-primary me-2' %>
+  <% end %>
+</div>
+

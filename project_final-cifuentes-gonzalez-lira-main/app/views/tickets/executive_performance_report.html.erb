@@ -1,0 +1,29 @@
+<div class="container">
+  <h1 class="text-center mb-4 mt-4">Executive Performance Report</h1>
+
+  <% @data.each do |year, rows| %>
+    <div class="card mb-3">
+      <div class="card-header text-center">
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#<%= year %>-collapse" aria-expanded="false" aria-controls="<%= year %>-collapse">
+          <%= year %> ▼
+        </button>
+      </div>
+      <div class="collapse" id="<%= year %>-collapse">
+        <ul class="list-group list-group-flush">
+          <% rows.each do |row| %>
+            <div class="container">
+            <li class="list-group-item">
+              <%= row[:executive].full_name %><br>
+              Tickets Asigned: <%= row[:tickets_created] %><br>
+              Tickets Closed: <%= row[:tickets_closed] %><br>
+              Open Cases: <%= row[:open_cases] %><br>
+              Average Rating: <%= row[:average_rating] %><br>
+            </li>
+              <%= link_to 'View Tickets', tickets_path(user_id: row[:executive].id), class: 'btn btn-secondary mb-4' %>
+            </div>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+</div>

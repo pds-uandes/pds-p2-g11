@@ -1,0 +1,15 @@
+<% if @tickets.any? %>
+  <h2>Search Results:</h2>
+
+  <% @tickets.each do |ticket| %>
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title"><%= ticket.title %></h5>
+        <p class="card-text"><%= ticket.description %></p>
+        <%= link_to 'View', ticket_path(ticket), class: 'btn btn-primary' %>
+      </div>
+    </div>  
+  <% end %>  
+<% else %>
+  <p>No results found.</p>
+<% end %>

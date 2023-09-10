@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Proyecto 3</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <style>
+      body {
+        background-image: url('https://coolbackgrounds.io/images/backgrounds/index/sea-edge-79ab30e2.png');
+        background-size: cover;
+        background-repeat: no-repeat;
+      }
+    </style>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+    <%= javascript_include_tag "https://cdn.jsdelivr.net/npm/chart.js" %>
+
+  </head>
+
+  <body>
+    <%= render partial: 'layouts/navbar' %>
+    <%= render partial: 'layouts/flash' %>
+    <%= yield %>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+<div class="container">
+  <h1>Edit Ticket</h1>
+  <%= render partial: 'ticket', locals: { ticket: @ticket, show_view_button: false } %>
+  <% if current_user.normal? %>
+    <div class="card mt-3">
+      <div class="card-body">
+        <%= form_with(model: @ticket) do |form| %>
+            <div class="mb-3">
+                <%= form.label :response_quality, class: 'form-label' %>
+                <%= form.select :response_quality, options_for_select([1, 2, 3, 4, 5], @ticket.response_quality), {}, class: 'form-select' %>
+            </div>
+            <%= form.submit "Accept Response", name: "accept_response", class: "btn btn-primary" %>
+            <%= form.submit "Reopen", name: "reopen", class: "btn btn-secondary" %>
+        <% end %>
+        
+      </div>
+    </div>
+  <% end %>
+  <% if current_user.executive? %>
+  <div class="card mt-3">
+    <div class="card-body">
+      <%= form_with(model: @ticket) do |form| %>
+        <div class="mb-3">
+          <%= form.label :executive_response, class: 'form-label' %>
+          <%= form.text_area :executive_response, class: 'form-control' %>
+        </div>
+        <%= form.submit "Submit Response", name: "submit_response", class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+</div>

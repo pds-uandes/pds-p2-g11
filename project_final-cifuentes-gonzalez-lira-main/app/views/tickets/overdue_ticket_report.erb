@@ -1,0 +1,7 @@
+<div class="container my-5">
+  <h1 class="mb-4">Overdue Tickets</h1>
+  <% @overdue_tickets.each do |ticket| %>
+    <%= render 'ticket', ticket: ticket, show_view_button: false %>
+    <%= link_to 'View Ticket', ticket_path(ticket), class: 'btn btn-primary' %>
+  <% end %>
+</div>

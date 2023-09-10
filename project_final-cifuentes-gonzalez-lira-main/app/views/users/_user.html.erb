@@ -1,0 +1,14 @@
+<div class="card mb-3">
+  <div class="card-header">
+    <%= user.full_name %>
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">Role: <%= user.role %></h5>
+    <% if action_name == 'show' %>
+      <p class="card-text">Email: <%= user.email %></p>
+    <% end %>
+    <% if show_view_button %>
+      <%= link_to 'View', user_path(user), class: 'btn btn-primary' %>
+    <% end %>
+  </div>
+</div>
