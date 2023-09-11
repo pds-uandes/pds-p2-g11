@@ -1,7 +1,12 @@
-
-<h1><%= @multiple_choice_question.question %></h1>
-
-<h2>Choices:</h2>
-<% @multiple_choice_question.choices.each do |choice| %>
-  <p><%= choice.answer %></p>
+<div class="container">
+<h4><%= @multiple_choice_question.question %></h4>
+<%= form_with url: {action: "submit_answer", id: @multiple_choice_question.id}, method: :post do %>
+  <% @multiple_choice_question.choices.each do |choice| %>
+    <%= radio_button_tag :selected_choice, choice.id %>
+    <%= label_tag :selected_choice, choice.answer %>
+    <br>
+  <% end %>
+  <br>
+  <%= submit_tag "Submit", class:'btn btn-primary btn-sm' %>
 <% end %>
+</div>

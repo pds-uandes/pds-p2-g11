@@ -2,7 +2,6 @@
 
 <html lang = "en">
 <head>
-    <link rel="stylesheet" href="app/assets/stylesheets/custom.css" type="text/css" >
 
     <title> ITS </title>
 </head>
@@ -18,7 +17,52 @@
     </div>
     </div>
     <br><br>
-        <%= link_to "Empezar Tarea", '#', class: 'btn btn-primary btn-lg' %>
+    <div class="text-center">
+
+    <%= button_to "Empezar Tarea", start_task_user_path(current_user), method: :post, class: 'btn btn-primary btn-lg' %>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card" style="width: 18rem;">
+            <div class="card-body">
+              <h6 class="card-title">Caracteristicas de la Onda</h6>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card" style="width: 18rem;">
+            <!-- Your image or content here -->
+            <div class="card-body">
+              <h6 class="card-title">Ondas Sonoras</h6>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title">Ondas Armonicas</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title">Ecuacion de la Onda</h5>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title">Energías e Información Transferida</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
 </body>
 </html>

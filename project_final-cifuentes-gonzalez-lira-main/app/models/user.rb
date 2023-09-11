@@ -3,9 +3,6 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
 
 
-  before_create :set_default_role
-
-
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
@@ -14,13 +11,7 @@ class User < ApplicationRecord
 
 
 
-  enum role: { normal: 0, executive: 1, supervisor: 2, admin: 3 }
-
-  belongs_to :supervisor, class_name: 'User', optional: true
-  has_many :executives, class_name: 'User', foreign_key: 'supervisor_id'
-  has_many :supervisors, class_name: 'User', foreign_key: 'admin_id'
-  belongs_to :admin, class_name: 'User', optional: true
-  has_many :comments
+  has_many :tasks, dependent: :destroy
 
 
   def full_name
@@ -29,9 +20,7 @@ class User < ApplicationRecord
 
   private
 
-  def set_default_role
-    self.role ||= :normal
-  end
+
 
 
 end

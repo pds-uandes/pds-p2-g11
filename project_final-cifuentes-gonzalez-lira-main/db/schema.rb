@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_11_025216) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_11_151905) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -28,6 +28,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_025216) do
     t.integer "difficulty"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "hint"
+    t.text "topic"
+    t.bigint "task_id", null: false
+    t.index ["task_id"], name: "index_multiple_choice_questions_on_task_id"
   end
 
   create_table "numeric_answers", force: :cascade do |t|
@@ -36,6 +40,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_025216) do
     t.text "equation"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "numeric_question_id"
+    t.text "hint"
+    t.index ["numeric_question_id"], name: "index_numeric_answers_on_numeric_question_id"
   end
 
   create_table "numeric_questions", force: :cascade do |t|
@@ -45,12 +52,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_025216) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "topic"
+    t.binary "image_data"
   end
 
   create_table "parameters", force: :cascade do |t|
     t.integer "number"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "numeric_question_id"
+    t.index ["numeric_question_id"], name: "index_parameters_on_numeric_question_id"
   end
 
   create_table "tasks", force: :cascade do |t|
@@ -59,6 +69,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_025216) do
     t.datetime "updated_at", null: false
     t.string "topic"
     t.jsonb "questions"
+    t.bigint "user_id"
+    t.jsonb "answered", default: []
+    t.jsonb "wrongs", default: []
+    t.index ["user_id"], name: "index_tasks_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -79,4 +93,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_025216) do
   end
 
   add_foreign_key "choices", "multiple_choice_questions"
+  add_foreign_key "multiple_choice_questions", "tasks"
+  add_foreign_key "numeric_answers", "numeric_questions"
+  add_foreign_key "parameters", "numeric_questions"
+  add_foreign_key "tasks", "users"
 end

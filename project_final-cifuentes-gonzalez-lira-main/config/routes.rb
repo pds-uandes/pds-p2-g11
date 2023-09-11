@@ -6,7 +6,12 @@ Rails.application.routes.draw do
   # root "articles#index"
   root "static_pages#home"
 
-  resources :users
+  resources :users do
+    post 'start_task', on: :member
+  end
+  resources :multiple_choice_questions do
+    post 'submit_answer', on: :member
+  end
   resources :multiple_choice_questions, only: [:show]  # Add this line
 
 
