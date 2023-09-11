@@ -1,12 +1,24 @@
-<div class="container mt-3">
-  <h1 class="mb-3">Home</h1>
-  <% if current_user.normal? || current_user.executive? %>
-    <%= link_to 'View Tickets', tickets_path, class: 'btn btn-primary me-2' %>
-  <% end %>
-  <% if current_user.normal? %>
-    <%= link_to 'Create Ticket', new_ticket_path, class: 'btn btn-secondary me-2' %>
-  <% elsif current_user.admin? || current_user.supervisor? %>
-    <%= link_to 'View Users', users_path, class: 'btn btn-primary me-2' %>
-  <% end %>
-</div>
+<!DOCTYPE html>
 
+<html lang = "en">
+<head>
+    <link rel="stylesheet" href="app/assets/stylesheets/custom.css" type="text/css" >
+
+    <title> ITS </title>
+</head>
+    <body>
+    <div class="jumbotron jumbotron-fluid " style='margin:auto; width:40rem; margin-top:3rem;'>
+    <div class="text-center">
+        <h1 class="display-4"><strong>ITS</strong></h1>
+        <i class="fa-solid fa-laptop-code fa-2xl"></i>
+        <p></p>
+        <p class="lead text-center">Vuelvete experto en Movimiento Ondulatorio</p>
+        <p></p>
+
+    </div>
+    </div>
+    <br><br>
+        <%= link_to "Empezar Tarea", '#', class: 'btn btn-primary btn-lg' %>
+
+</body>
+</html>

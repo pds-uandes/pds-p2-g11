@@ -10,75 +10,55 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_19_032146) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_11_025216) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "active_storage_attachments", force: :cascade do |t|
-    t.string "name", null: false
-    t.string "record_type", null: false
-    t.bigint "record_id", null: false
-    t.bigint "blob_id", null: false
-    t.datetime "created_at", null: false
-    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
-    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
-  end
-
-  create_table "active_storage_blobs", force: :cascade do |t|
-    t.string "key", null: false
-    t.string "filename", null: false
-    t.string "content_type"
-    t.text "metadata"
-    t.string "service_name", null: false
-    t.bigint "byte_size", null: false
-    t.string "checksum"
-    t.datetime "created_at", null: false
-    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
-  end
-
-  create_table "active_storage_variant_records", force: :cascade do |t|
-    t.bigint "blob_id", null: false
-    t.string "variation_digest", null: false
-    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
-  end
-
-  create_table "comments", force: :cascade do |t|
-    t.text "body"
-    t.bigint "ticket_id", null: false
-    t.bigint "user_id", null: false
+  create_table "choices", force: :cascade do |t|
+    t.text "answer"
+    t.boolean "correct"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["ticket_id"], name: "index_comments_on_ticket_id"
-    t.index ["user_id"], name: "index_comments_on_user_id"
+    t.bigint "multiple_choice_question_id", null: false
+    t.index ["multiple_choice_question_id"], name: "index_choices_on_multiple_choice_question_id"
   end
 
-  create_table "tags", force: :cascade do |t|
-    t.string "name"
+  create_table "multiple_choice_questions", force: :cascade do |t|
+    t.text "question"
+    t.integer "difficulty"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "tags_tickets", id: false, force: :cascade do |t|
-    t.bigint "ticket_id", null: false
-    t.bigint "tag_id", null: false
-  end
-
-  create_table "tickets", force: :cascade do |t|
-    t.bigint "normal_user_id"
-    t.bigint "executive_user_id"
+  create_table "numeric_answers", force: :cascade do |t|
+    t.text "respuesta"
+    t.boolean "correct"
+    t.text "equation"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "title"
-    t.text "description"
-    t.integer "state", default: 0
-    t.string "priority", default: "low"
-    t.datetime "deadline"
-    t.datetime "incident_date", precision: nil
-    t.text "executive_response"
-    t.integer "response_quality"
-    t.datetime "closed_at"
-    t.index ["executive_user_id"], name: "index_tickets_on_executive_user_id"
-    t.index ["normal_user_id"], name: "index_tickets_on_normal_user_id"
+  end
+
+  create_table "numeric_questions", force: :cascade do |t|
+    t.text "pregunta"
+    t.integer "difficulty"
+    t.integer "score"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "topic"
+  end
+
+  create_table "parameters", force: :cascade do |t|
+    t.integer "number"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "tasks", force: :cascade do |t|
+    t.integer "score"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "topic"
+    t.jsonb "questions"
   end
 
   create_table "users", force: :cascade do |t|
@@ -92,14 +72,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_19_032146) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "role"
+    t.integer "test", limit: 2
+    t.integer "question"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "comments", "tickets"
-  add_foreign_key "comments", "users"
-  add_foreign_key "tickets", "users", column: "executive_user_id"
-  add_foreign_key "tickets", "users", column: "normal_user_id"
+  add_foreign_key "choices", "multiple_choice_questions"
 end

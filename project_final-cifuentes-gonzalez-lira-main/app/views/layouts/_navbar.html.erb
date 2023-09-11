@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
-    <%= link_to 'TicketApp', root_path, class: 'navbar-brand' %>
+    <%= link_to 'ITS', root_path, class: 'navbar-brand' %>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -9,26 +9,26 @@
         <% if user_signed_in? %>
           <% if current_user.executive? || current_user.normal? %>
             <li class="nav-item">
-              <%= link_to 'Tickets', tickets_path, class: 'nav-link active' %>
+
             </li>
           <% end %>
           <% if current_user.normal? %>
             <li class="nav-item">
-              <%= link_to 'Create Ticket', new_ticket_path, class: 'nav-link active' %>
+              <%= link_to 'Create Ticket', '#', class: 'nav-link active' %>
             </li>
           <% end %>
           <% if current_user.admin? || current_user.supervisor? %>
             <li class="nav-item">
-              <%= link_to 'User Management', users_path, class: 'nav-link active' %>
+              <%= link_to 'User Management', '#', class: 'nav-link active' %>
             </li>
             <li class="nav-item">
-              <%= link_to 'Ticket Reports', reports_tickets_path, class: 'nav-link active' %>
+              <%= link_to 'Ticket Reports', '#', class: 'nav-link active' %>
             </li>
             <li class="nav-item">
-              <%= link_to 'Overdue Ticket Report', overdue_ticket_report_path, class: 'nav-link active' %>
+              <%= link_to 'Overdue Ticket Report', '#', class: 'nav-link active' %>
             </li>
             <li class="nav-item">
-              <%= link_to 'Executive Performance Report', executive_performance_report_path, class: 'nav-link active' %>
+              <%= link_to 'Executive Performance Report', '#', class: 'nav-link active' %>
             </li>
           <% end %>
         <% end %>
@@ -44,7 +44,7 @@
         </ul>
       <% end %>
       <% if user_signed_in?  %>
-        <%= form_tag(tickets_path, method: :get, remote: true, class: 'd-flex') do %>
+        <%= form_tag('#', method: :get, remote: true, class: 'd-flex') do %>
           <%= text_field_tag :search, params[:search], class: 'form-control me-2', placeholder: 'Search' %>
           <%= submit_tag "Search", class: 'btn btn-primary' %>
         <% end %>

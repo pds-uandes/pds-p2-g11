@@ -22,19 +22,16 @@ class User < ApplicationRecord
   belongs_to :admin, class_name: 'User', optional: true
   has_many :comments
 
-  #Tickets
-  has_many :normal_user_tickets, class_name: 'Ticket', foreign_key: 'normal_user_id', dependent: :destroy
-  has_many :executive_user_tickets, class_name: 'Ticket', foreign_key: 'executive_user_id'
 
   def full_name
     "#{first_name } #{last_name}"
   end
-  
+
   private
 
   def set_default_role
     self.role ||= :normal
   end
 
-  
+
 end
