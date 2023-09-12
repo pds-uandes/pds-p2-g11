@@ -40,31 +40,39 @@ class UsersController < ApplicationController
     @user = current_user
 
     if @user.tasks.empty?
-      # Create a new task with 4 random questions
+      # Create a new task with 3 random questions from the seed
       @task = Task.create(user: @user)
-      questions = MultipleChoiceQuestion.where(topic: "TEMA 1").sample(4)
-      @task.questions = questions
+      questions = MultipleChoiceQuestion.where(topic: "TEMA 1").order("RANDOM()").limit(3)
+      @task.multiple_choice_questions << questions
+      puts @task
       if @task.save
         puts "Task saved successfully"
       else
         puts "Failed to save task"
         puts @task.errors.full_messages
       end
+
     else
       # Use the last task of the user
       @task = @user.tasks.last
     end
 
     if @task&.multiple_choice_questions&.present?
-      # Redirect to a random question from the task
-      redirect_to multiple_choice_question_path(@task.multiple_choice_questions.sample)
+      # Redirect to the first question in the task
+      redirect_to multiple_choice_question_path(@task.multiple_choice_questions.first)
     else
       # Handle the case where there are no questions or @task is nil
       # Redirect to an appropriate page or display an error message
       redirect_to root_path, alert: "No questions available for the task."
-
     end
+  end
+
+
+  def redo_task
+
+    puts "REDOOOOOOOOOOOOOOOOOOOOOOOOOO"
 
   end
+
 
 end

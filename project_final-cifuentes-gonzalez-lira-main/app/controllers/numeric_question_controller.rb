@@ -1,15 +1,12 @@
 class NumericQuestionsController < ApplicationController
   def create_first_question
-    # Generate random values for wave speed (v) and frequency (f)
-    wave_speed = rand(100..300)  # Adjust the range as needed
-    frequency = rand(1..10)      # Adjust the range as needed
+    wave_speed = rand(100..300)
+    frequency = rand(1..10)
     wavelength = (wave_speed.to_f / frequency.to_f).round(2)
 
-    # Load the image data (assuming you have the same image for all players)
     image_path = Rails.root.join('public', 'images', 'longitud_onda.jpg')
     image_data = File.read(image_path)
 
-    # Create a new NumericQuestion with the random parameters
     nq = NumericQuestion.create!(
       question: "Si una onda se propaga a una velocidad de _ metros por segundo (m/s) y su frecuencia es de _ Hz, ¿cuál es la longitud de onda de esta onda?",
       image_data: image_data,
@@ -51,6 +48,8 @@ class NumericQuestionsController < ApplicationController
 
       a) ¿Cuál es la longitud de onda de esta onda sonora?
       b) Si la frecuencia de la nota se duplica, ¿cómo cambiará la longitud de onda?
+
+      Redondear las respuestas a los ultimos dos decimales.
       ",
       image_data: image_data,
       difficulty: 1,

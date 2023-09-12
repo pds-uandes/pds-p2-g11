@@ -1,0 +1,29 @@
+
+<div class="container" style='margin-top:15px'>
+    <div class="text-center">
+    <h1>Results</h1>
+    </div>
+    <br>
+    <% @questions.each_with_index do |question, index| %>
+    <div>
+        <h6>
+        <% if @task.wrongs.include?(question.id) %>
+            ❌
+        <% else %>
+            ✅
+        <% end %>
+        <%= index + 1 %>) <%= question.question %>
+         </h6>
+        <p>📈<b> Dificultad:</b> <%= question.difficulty %> || 📖 <b>Tema:</b> <%= question.topic %></p>
+        <% if @task.wrongs.include?(question.id) %>
+        <p>❔ <b>Hint:</b> <%= question.hint %></p>
+        <% end %>
+    </div>
+    <% end %>
+
+    <% if @task.wrongs.present? && !@task.redo %>
+        <%= link_to 'Redo Questions', redo_answer_multiple_choice_questions_path(id: @task.wrongs.first), class: 'btn btn-primary' %>
+    <% else %>
+        <%= link_to 'Ir a inicio', root_path, class: 'btn btn-primary' %>
+        <% end %>
+</div>

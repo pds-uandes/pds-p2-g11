@@ -4,14 +4,16 @@ class MultipleChoiceQuestionsController < ApplicationController
 
   def show
     @multiple_choice_question = MultipleChoiceQuestion.find(params[:id])
+    @user = current_user
+    @task = @user.tasks.last
   end
 
   def submit_answer
     @multiple_choice_question = MultipleChoiceQuestion.find(params[:id])
     selected_choice = Choice.find(params[:selected_choice])
-
+    @user = current_user
     #Buscamos el task para actualizar el json/diccionario
-    @task = @multiple_choice_question.task
+    @task = @user.tasks.last
     # Check if the answer is correct
     is_correct = selected_choice.correct?
 
@@ -37,10 +39,18 @@ class MultipleChoiceQuestionsController < ApplicationController
       redirect_to multiple_choice_question_path(next_question)
     else
       # Handle the case where there are no more questions
-      redirect_to results_path(@task)
-      redirect_to root_path, notice: "You've answered all questions!"
+
+      redirect_to results_path(task_id: @task.id)
     end
   end
 
+  def redo_answer
+     #Si estamos haciendo las preguntas de nuevo
+    #  if @task.redo
+    #   @task.answered << @multiple_choice_question.id
+    #   @task.answered.uniq!
+    redirect_to root_path
 
-end
+
+    end
+  end

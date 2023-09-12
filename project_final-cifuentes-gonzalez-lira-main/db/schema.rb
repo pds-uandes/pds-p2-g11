@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_11_151905) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_11_223548) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -30,7 +30,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_151905) do
     t.datetime "updated_at", null: false
     t.text "hint"
     t.text "topic"
-    t.bigint "task_id", null: false
+    t.bigint "task_id"
     t.index ["task_id"], name: "index_multiple_choice_questions_on_task_id"
   end
 
@@ -63,6 +63,13 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_151905) do
     t.index ["numeric_question_id"], name: "index_parameters_on_numeric_question_id"
   end
 
+  create_table "task_mcq_joint", id: false, force: :cascade do |t|
+    t.bigint "task_id"
+    t.bigint "multiple_choice_question_id"
+    t.index ["multiple_choice_question_id"], name: "index_task_mcq_joint_on_multiple_choice_question_id"
+    t.index ["task_id"], name: "index_task_mcq_joint_on_task_id"
+  end
+
   create_table "tasks", force: :cascade do |t|
     t.integer "score"
     t.datetime "created_at", null: false
@@ -72,6 +79,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_151905) do
     t.bigint "user_id"
     t.jsonb "answered", default: []
     t.jsonb "wrongs", default: []
+    t.boolean "redo", default: false
     t.index ["user_id"], name: "index_tasks_on_user_id"
   end
 
@@ -86,7 +94,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_151905) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "role"
-    t.integer "test", limit: 2
+    t.integer "task"
     t.integer "question"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
@@ -96,5 +104,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_151905) do
   add_foreign_key "multiple_choice_questions", "tasks"
   add_foreign_key "numeric_answers", "numeric_questions"
   add_foreign_key "parameters", "numeric_questions"
+  add_foreign_key "task_mcq_joint", "multiple_choice_questions"
+  add_foreign_key "task_mcq_joint", "tasks"
   add_foreign_key "tasks", "users"
 end
