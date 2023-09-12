@@ -59,7 +59,9 @@ Rails.application.configure do
   # Suppress logger output for asset requests.
   config.assets.quiet = true
 
-  config.hosts << "jl53xw6v-3000.brs.devtunnels.ms"
+  config.hosts << "localhost:3000"
+  config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+  # config.hosts << "jl53xw6v-3000.brs.devtunnels.ms"
 
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true

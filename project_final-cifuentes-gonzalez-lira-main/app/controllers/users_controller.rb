@@ -89,7 +89,7 @@ class UsersController < ApplicationController
       end#End de user.task = 1
       end
 
-      if @user.task == 3
+      if @user.task == 0
           # Create a new task with 3 random questions from the seed
           @task = Task.create(user: @user, score: 0)
           questions = MultipleChoiceQuestion.where(topic: "TEMA 1").order("RANDOM()").limit(3)
@@ -135,7 +135,7 @@ class UsersController < ApplicationController
       end
     end
 
-    if @user.task == 0
+    if @user.task == 3
 
       @task = Task.create(user: @user, score: 0)
       # @task.numeric_questions << nq
