@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
-    def show
-        @user = User.find(params[:id])
-    end
+  def show
+      @user = User.find(params[:id])
+  end
 
   before_action :authenticate_user!
   before_action :ensure_authorized_user, only: [:index]
@@ -36,43 +36,81 @@ class UsersController < ApplicationController
     end
   end
 
+
   def start_task
     @user = current_user
+    puts "Este usuario esta en el task numero:"
+    puts @user.task
+    puts "----------------------------------"
 
     if @user.tasks.empty?
-      # Create a new task with 3 random questions from the seed
-      @task = Task.create(user: @user)
-      questions = MultipleChoiceQuestion.where(topic: "TEMA 1").order("RANDOM()").limit(3)
-      @task.multiple_choice_questions << questions
-      puts @task
-      if @task.save
-        puts "Task saved successfully"
-      else
-        puts "Failed to save task"
-        puts @task.errors.full_messages
+
+      if @user.task == 0
+
+        @task = Task.create(user: @user, score: 0)
+        # @task.numeric_questions << nq
+
+        questions = NumericQuestion.where(topic: "TEMA 1").limit(1)
+        if @task.save
+          puts "Task saved successfully"
+        else
+          puts "Failed to save task"
+          puts @task.errors.full_messages
+        end
+
+        puts "Esta es la pregunta numerica escogida:"
+        puts questions.first.pregunta
+        @task.numeric_questions << questions
+
+
+        puts "Numeric question present???"
+        puts @task&.numeric_questions&.present?
+        puts "==================================="
+        #redirect_to numeric_question_path(@task.numeric_questions.first)
+        if @task&.numeric_questions&.present?
+          # Redirect to the first question in the task
+          #redirect_to multiple_choice_question_path(@task.multiple_choice_questions.first)
+          #hacer redirect
+          puts "-------------"
+          redirect_to numeric_question_path(@task.numeric_questions.first)
+
+          #redirect_to root_path, alert: "Redirect de numerical"
+        else
+          # Handle the case where there are no questions or @task is nil
+          # Redirect to an appropriate page or display an error message
+          redirect_to root_path, alert: "No questions available for the task."
+          return
+        end
+
+      end#End de user.task = 1
       end
 
-    else
-      # Use the last task of the user
-      @task = @user.tasks.last
+      if @user.task == 1
+          # Create a new task with 3 random questions from the seed
+          @task = Task.create(user: @user, score: 0)
+          questions = MultipleChoiceQuestion.where(topic: "TEMA 1").order("RANDOM()").limit(3)
+          @task.multiple_choice_questions << questions
+          puts @task
+          if @task.save
+            puts "Task saved successfully"
+          else
+            puts "Failed to save task"
+            puts @task.errors.full_messages
+          end
+
+        #else curioso
+        # else
+        #   @task = @user.tasks.last
+        # end
+
+        if @task&.multiple_choice_questions&.present?
+          # Redirect to the first question in the task
+          redirect_to multiple_choice_question_path(@task.multiple_choice_questions.first)
+        else
+          # Handle the case where there are no questions or @task is nil
+          # Redirect to an appropriate page or display an error message
+          redirect_to root_path, alert: "No questions available for the task."
+        end
+      end
     end
-
-    if @task&.multiple_choice_questions&.present?
-      # Redirect to the first question in the task
-      redirect_to multiple_choice_question_path(@task.multiple_choice_questions.first)
-    else
-      # Handle the case where there are no questions or @task is nil
-      # Redirect to an appropriate page or display an error message
-      redirect_to root_path, alert: "No questions available for the task."
-    end
-  end
-
-
-  def redo_task
-
-    puts "REDOOOOOOOOOOOOOOOOOOOOOOOOOO"
-
-  end
-
-
 end

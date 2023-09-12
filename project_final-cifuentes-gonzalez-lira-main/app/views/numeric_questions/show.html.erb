@@ -1,19 +1,10 @@
-<div class="container" style='margin-top:10px;padding: 20px;
-  border-radius: 25px; background-color: rgb(255 255 255/ 50%);'>
 
-    <h4><%= @numeric_question.question_with_values %></h4>
-    <% if @numeric_question.image.attached? %>
-      <%= image_tag url_for(@numeric_question.image) %>
-    <% end %>
-
-    <%= form_with url: {action: "submit_answer", id: @numeric_question.id}, method: :post do %>
-        <% @numeric_question.numeric_answers.each do |answer| %>
-            <%= radio_button_tag :selected_answer, answer.id %>
-            <%= label_tag :selected_answer, answer.calculate_answer %>
-            <br>
-        <% end %>
-        <br>
-    <%= submit_tag "Submit", class:'btn btn-primary btn-sm' %>
-    <% end %>
+<div class="container">
+<%= form_with(url: numeric_question_answer_path(@numeric_question), method: :post) do |form| %>
+  <div class="form-group">
+    <label><%= @numeric_question.question_with_values %></label>
+    <%= form.number_field :answer, class: 'form-control', placeholder: 'Enter your answer here' %>
+  </div>
+  <%= form.submit 'Submit', class: 'btn btn-primary' %>
+<% end %>
 </div>
-

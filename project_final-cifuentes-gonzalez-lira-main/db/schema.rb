@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_11_223548) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_12_041402) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -60,6 +60,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_223548) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "numeric_question_id"
+    t.string "name"
     t.index ["numeric_question_id"], name: "index_parameters_on_numeric_question_id"
   end
 
@@ -80,7 +81,16 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_223548) do
     t.jsonb "answered", default: []
     t.jsonb "wrongs", default: []
     t.boolean "redo", default: false
+    t.jsonb "wrongsaux", default: []
+    t.boolean "first_time", default: false
     t.index ["user_id"], name: "index_tasks_on_user_id"
+  end
+
+  create_table "tasks_numeric_questions", id: false, force: :cascade do |t|
+    t.bigint "task_id"
+    t.bigint "numeric_question_id"
+    t.index ["numeric_question_id"], name: "index_tasks_numeric_questions_on_numeric_question_id"
+    t.index ["task_id"], name: "index_tasks_numeric_questions_on_task_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -94,7 +104,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_223548) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "role"
-    t.integer "task"
+    t.integer "task", default: 0
     t.integer "question"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
@@ -107,4 +117,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_11_223548) do
   add_foreign_key "task_mcq_joint", "multiple_choice_questions"
   add_foreign_key "task_mcq_joint", "tasks"
   add_foreign_key "tasks", "users"
+  add_foreign_key "tasks_numeric_questions", "numeric_questions"
+  add_foreign_key "tasks_numeric_questions", "tasks"
 end

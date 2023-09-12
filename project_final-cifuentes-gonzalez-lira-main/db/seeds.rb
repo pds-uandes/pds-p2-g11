@@ -94,6 +94,38 @@ Choice.create!([
 
 ################################### Numerical Questions #########################################
 
+wave_speed = rand(100..300)
+frequency = rand(1..10)
+wavelength = (wave_speed.to_f / frequency.to_f).round(2)
+
+image_path = Rails.root.join('public', 'images', 'longitud_onda.png')
+image_data = File.read(image_path)
+
+nq = NumericQuestion.create!(
+  pregunta: "Si una onda se propaga a una velocidad de _ metros por segundo (m/s) y su frecuencia es de _ Hz, ¿cuál es la longitud de onda de esta onda?",
+  image_data: image_data,
+  difficulty: 1,
+  topic: "TEMA 1"
+)
+
+# Create Parameters for the question
+Parameter.create!(
+  [
+    { name: 'Wave Speed', number: wave_speed, numeric_question: nq },
+    { name: 'Frequency', number: frequency, numeric_question: nq }
+  ]
+)
+
+
+# Create a NumericAnswer with the calculated wavelength
+NumericAnswer.create!(
+  respuesta: wavelength,
+  correct: true,
+  numeric_question: nq,
+  equation: "v / f",
+  hint: 'Recuerda que la longitud de onda es la distancia entre dos'
+)
+
 # db/seeds.rb
 
 # # Create a NumericQuestion

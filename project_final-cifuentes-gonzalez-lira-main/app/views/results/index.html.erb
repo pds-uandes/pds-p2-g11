@@ -2,6 +2,8 @@
 <div class="container" style='margin-top:15px'>
     <div class="text-center">
     <h1>Results</h1>
+    <br>
+    <h3>Puntaje: <%= @task.score %></h3>
     </div>
     <br>
     <% @questions.each_with_index do |question, index| %>
@@ -21,9 +23,25 @@
     </div>
     <% end %>
 
-    <% if @task.wrongs.present? && !@task.redo %>
-        <%= link_to 'Redo Questions', redo_answer_multiple_choice_questions_path(id: @task.wrongs.first), class: 'btn btn-primary' %>
-    <% else %>
+    <% if !@task.first_time %>
+        <% @task.answered.clear %>
+        <% @task.first_time = true %>
+        <% @task.save %>
+    <% end %>
+
+    <% if @task.wrongsaux.length == 0 ||  @task.answered.length == @task.wrongsaux.length %>
+        <% @user.task += 1 %>
+        <% @user.save %>
+        <% @user.tasks.destroy_all %>
         <%= link_to 'Ir a inicio', root_path, class: 'btn btn-primary' %>
+
+    <% else %>
+        <% if @task.answered.length != @task.wrongsaux.length %>
+             <% @task.redo = true %>
+             <% @task.save %>
+            <%= link_to 'Go to Redo Questions', multiple_choice_question_path(@task.wrongs.first), class: 'btn btn-primary' %>
         <% end %>
-</div>
+    <% end %>
+  </div>
+
+

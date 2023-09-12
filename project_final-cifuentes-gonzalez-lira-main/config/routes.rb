@@ -10,13 +10,17 @@ Rails.application.routes.draw do
     post 'start_task', on: :member
   end
 
-  resources :multiple_choice_questions do
+
+  resources :numeric_questions, only: [:show] do
     post 'submit_answer', on: :member
-    post 'redo_answer', on: :member  # Add this line
+    post 'redo_answer', on: :member
   end
 
-  resources :multiple_choice_questions, only: [:show]  # Add this line
-  resources :results, only: [:index]
+  resources :multiple_choice_questions, only: [:show] do
+    post 'submit_answer', on: :member
+    get 'redo_answer', on: :collection, to: 'multiple_choice_questions#redo_answer'
+    post 'redo_answer', on: :member
+  end
 
-  post 'multiple_choice_questions/:id/redo_answer', to: 'multiple_choice_questions#redo_answer', as: :redo_answer_multiple_choice_question
+  resources :results, only: [:index]
 end
