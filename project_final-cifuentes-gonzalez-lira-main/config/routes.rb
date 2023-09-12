@@ -10,8 +10,8 @@ Rails.application.routes.draw do
     post 'start_task', on: :member
   end
 
-
   resources :numeric_questions, only: [:show] do
+    resources :numeric_answers, only: [:create, :update]
     post 'submit_answer', on: :member
     post 'redo_answer', on: :member
   end

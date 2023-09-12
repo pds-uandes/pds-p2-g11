@@ -6,6 +6,7 @@
     <h3>Puntaje: <%= @task.score %></h3>
     </div>
     <br>
+    <% if !@numeric %>
     <% @questions.each_with_index do |question, index| %>
     <div>
         <h6>
@@ -33,6 +34,8 @@
         <% @user.task += 1 %>
         <% @user.save %>
         <% @user.tasks.destroy_all %>
+        <% @task.first_time = false %>
+        <% @task.save %>
         <%= link_to 'Ir a inicio', root_path, class: 'btn btn-primary' %>
 
     <% else %>
@@ -41,6 +44,55 @@
              <% @task.save %>
             <%= link_to 'Go to Redo Questions', multiple_choice_question_path(@task.wrongs.first), class: 'btn btn-primary' %>
         <% end %>
+    <% end %>
+
+<%# numeric %>
+    <% else %>
+
+
+    <% @questions.each do |question| %>
+    <div>
+        <h6>
+        <% if @task.wrongs.include?(question.id) %>
+            ❌
+        <% else %>
+            ✅
+        <% end %>
+        <%= question.pregunta %>
+         </h6>
+        <p>📈<b> Dificultad:</b> <%= question.difficulty %> || 📖 <b>Tema:</b> <%= question.topic %></p>
+        <% if @task.wrongs.include?(question.id) %>
+
+        <% end %>
+    </div>
+    <% end %>
+
+    <% if !@task.first_time %>
+        <% @task.answered.clear %>
+        <% @task.first_time = true %>
+        <% @task.save %>
+    <% end %>
+
+    <% if @task.wrongsaux.length == 0 ||  @task.answered.length == @task.wrongsaux.length %>
+        <% @user.task += 1 %>
+        <% @user.save %>
+        <% @user.tasks.destroy_all %>
+        <% @task.first_time = false %>
+        <% @task.save %>
+        <%= link_to 'Ir a inicio', root_path, class: 'btn btn-primary' %>
+
+    <% else %>
+        <% if @task.answered.length != @task.wrongsaux.length %>
+             <% @task.redo = true %>
+             <% @task.save %>
+            <%= link_to 'Go to Redo Questions', numeric_question_path(@task.wrongs.first), class: 'btn btn-primary' %>
+        <% end %>
+    <% end %>
+
+  </div>
+
+
+
     <% end %>
   </div>
 

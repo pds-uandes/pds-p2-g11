@@ -90,19 +90,103 @@ Choice.create!([
   { answer: "Onda periódica.", correct: false, multiple_choice_question: mcq }
 ])
 
+### tema2 ###
+mcq1 = MultipleChoiceQuestion.create!(question: "¿Qué es una onda sonora?", difficulty: 1, topic: "TEMA 2", hint: 'Piensa en cómo percibimos el sonido.')
+Choice.create!([
+  { answer: "Una perturbación que se propaga a través de un medio material.", correct: true, multiple_choice_question: mcq1 },
+  { answer: "Una partícula que viaja a través del aire.", correct: false, multiple_choice_question: mcq1 },
+  { answer: "Una forma de energía luminosa.", correct: false, multiple_choice_question: mcq1 },
+  { answer: "Un tipo de onda electromagnética.", correct: false, multiple_choice_question: mcq1 }
+])
+
+mcq2 = MultipleChoiceQuestion.create!(question: "¿Cómo se mide la altura de una onda sonora?", difficulty: 1, topic: "TEMA 2", hint: 'Piensa en las características de una onda.')
+Choice.create!([
+  { answer: "Frecuencia", correct: false, multiple_choice_question: mcq2 },
+  { answer: "Amplitud", correct: true, multiple_choice_question: mcq2 },
+  { answer: "Velocidad", correct: false, multiple_choice_question: mcq2 },
+  { answer: "Longitud de onda", correct: false, multiple_choice_question: mcq2 }
+])
+
+mcq3 = MultipleChoiceQuestion.create!(question: "¿Qué determina la velocidad del sonido en un medio?", difficulty: 1, topic: "TEMA 2", hint: 'Piensa en las propiedades del medio.')
+Choice.create!([
+  { answer: "La temperatura y la densidad del medio.", correct: true, multiple_choice_question: mcq3 },
+  { answer: "La amplitud de la onda sonora.", correct: false, multiple_choice_question: mcq3 },
+  { answer: "La frecuencia de la onda sonora.", correct: false, multiple_choice_question: mcq3 },
+  { answer: "El color del medio.", correct: false, multiple_choice_question: mcq3 }
+])
+
+mcq4 = MultipleChoiceQuestion.create!(question: "¿Qué es la frecuencia de una onda sonora?", difficulty: 1, topic: "TEMA 2", hint: 'Piensa en cómo se relaciona la frecuencia con el tono del sonido.')
+Choice.create!([
+  { answer: "Es la altura de la onda sonora.", correct: false, multiple_choice_question: mcq4 },
+  { answer: "Es el número de oscilaciones por segundo.", correct: true, multiple_choice_question: mcq4 },
+  { answer: "Es la velocidad de la onda sonora.", correct: false, multiple_choice_question: mcq4 },
+  { answer: "Es la longitud de la onda sonora.", correct: false, multiple_choice_question: mcq4 }
+])
+
+mcq5 = MultipleChoiceQuestion.create!(question: "¿Qué es la longitud de onda en una onda sonora?", difficulty: 1, topic: "TEMA 2", hint: 'Piensa en la distancia entre dos crestas de una onda.')
+Choice.create!([
+  { answer: "Es la distancia entre dos puntos consecutivos que están en fase.", correct: true, multiple_choice_question: mcq5 },
+  { answer: "Es la altura de la onda.", correct: false, multiple_choice_question: mcq5 },
+  { answer: "Es el número de oscilaciones por segundo.", correct: false, multiple_choice_question: mcq5 },
+  { answer: "Es la velocidad de propagación de la onda.", correct: false, multiple_choice_question: mcq5 }
+])
+
+mcq6 = MultipleChoiceQuestion.create!(question: "¿Cómo se relaciona la frecuencia con el tono de un sonido?", difficulty: 1, topic: "TEMA 2", hint: 'Piensa en cómo percibes los sonidos altos y bajos.')
+Choice.create!([
+  { answer: "Los sonidos de alta frecuencia se perciben como tonos bajos.", correct: false, multiple_choice_question: mcq6 },
+  { answer: "Los sonidos de baja frecuencia se perciben como tonos altos.", correct: false, multiple_choice_question: mcq6 },
+  { answer: "Los sonidos de alta frecuencia se perciben como tonos altos.", correct: true, multiple_choice_question: mcq6 },
+  { answer: "La frecuencia no afecta al tono del sonido.", correct: false, multiple_choice_question: mcq6 }
+])
+
+mcq7 = MultipleChoiceQuestion.create!(question: "¿Qué es una onda estacionaria?", difficulty: 1, topic: "TEMA 2", hint:'Piensa en una cuerda vibrante sujeta en ambos extremos.')
+Choice.create!([
+  { answer: "Es una onda que se propaga a través de un medio.", correct: false, multiple_choice_question: mcq7 },
+  { answer: "Es una onda que resulta de la superposición de dos ondas de igual frecuencia que viajan en direcciones opuestas.", correct: true, multiple_choice_question: mcq7 },
+  { answer: "Es una onda cuya amplitud varía con el tiempo.", correct: false, multiple_choice_question: mcq7 },
+  { answer: "Es una onda cuya velocidad varía con el tiempo.", correct: false, multiple_choice_question: mcq7 }
+])
+
+mcq8 = MultipleChoiceQuestion.create!(question:"¿Qué es el eco?", difficulty: 1 ,topic:"TEMA 2", hint:'Piensa en el sonido que escuchas cuando gritas en un lugar vacío y grande.')
+Choice.create!([
+    {answer:"Es un tipo de ruido ambiental.",correct:false,multiple_choice_question: mcq8},
+    {answer:"Es el reflejo del sonido que llega al oyente algún tiempo después del sonido directo.",correct: true,multiple_choice_question: mcq8},
+    {answer:"Es un tipo de onda electromagnética.",correct: false,multiple_choice_question: mcq8},
+    {answer:"Es un cambio en la frecuencia del sonido debido al movimiento relativo entre la fuente y el observador.",correct: false,multiple_choice_question: mcq8}
+])
+
+mcq9 = MultipleChoiceQuestion.create!(question:"¿Qué es el efecto Doppler?", difficulty: 1 ,topic:"TEMA 2", hint:'Piensa en el cambio en el tono de una sirena cuando pasa por ti.')
+Choice.create!([
+    {answer:"Es un cambio en la amplitud del sonido debido al movimiento relativo entre la fuente y el observador.",correct:false,multiple_choice_question: mcq9},
+    {answer:"Es un cambio en la velocidad del sonido debido al movimiento relativo entre la fuente y el observador.",correct:false,multiple_choice_question:mcq9},
+    {answer:"Es un cambio en la longitud de onda del sonido debido al movimiento relativo entre la fuente y el observador.",correct:false,multiple_choice_question: mcq9},
+    {answer:"Es un cambio en la frecuencia del sonido debido al movimiento relativo entre la fuente y el observador.",correct:true,multiple_choice_question: mcq9}
+])
+
+mcq10 = MultipleChoiceQuestion.create!(question:"¿Qué es la resonancia?", difficulty: 1 ,topic:"TEMA 2", hint:'Piensa en lo que sucede cuando empujas a alguien en un columpio al ritmo correcto.')
+Choice.create!([
+    {answer:"Es la superposición de dos ondas de igual frecuencia.",correct: false,multiple_choice_question: mcq10},
+    {answer:"Es el aumento en la amplitud de una vibración que ocurre cuando se aplica una fuerza periódica a la misma frecuencia que la frecuencia natural de vibración del sistema.",correct:true,multiple_choice_question:mcq10},
+    {answer:"Es el reflejo del sonido.",correct:false,multiple_choice_question:mcq10},
+    {answer:"Es un cambio en la frecuencia del sonido debido al movimiento relativo entre la fuente y el observador.",correct:false,multiple_choice_question:mcq10}
+])
+
+
 
 
 ################################### Numerical Questions #########################################
 
 wave_speed = rand(100..300)
-frequency = rand(1..10)
+frequency = rand(5..10)
 wavelength = (wave_speed.to_f / frequency.to_f).round(2)
 
 image_path = Rails.root.join('public', 'images', 'longitud_onda.png')
 image_data = File.read(image_path)
 
 nq = NumericQuestion.create!(
-  pregunta: "Si una onda se propaga a una velocidad de _ metros por segundo (m/s) y su frecuencia es de _ Hz, ¿cuál es la longitud de onda de esta onda?",
+  pregunta: "Si una onda se propaga a una velocidad de (VELOCIDAD) metros por segundo (m/s) y su frecuencia es de (FRECUENCIA) Hz, ¿cuál es la longitud de onda de esta onda?
+  Usar un decimal.
+  ",
   image_data: image_data,
   difficulty: 1,
   topic: "TEMA 1"
@@ -111,8 +195,8 @@ nq = NumericQuestion.create!(
 # Create Parameters for the question
 Parameter.create!(
   [
-    { name: 'Wave Speed', number: wave_speed, numeric_question: nq },
-    { name: 'Frequency', number: frequency, numeric_question: nq }
+    {name: '(VELOCIDAD)', number: wave_speed, numeric_question: nq },
+    {name: '(FRECUENCIA)', number: frequency, numeric_question: nq }
   ]
 )
 
@@ -126,6 +210,51 @@ NumericAnswer.create!(
   hint: 'Recuerda que la longitud de onda es la distancia entre dos'
 )
 
+
+wave_speed = rand(400..500)
+frequency = rand(300..400)
+wavelength = (wave_speed.to_f / frequency.to_f).round(2)
+
+image_path = Rails.root.join('public', 'images', 'sonido_.gif')
+image_data = File.read(image_path)
+
+nq = NumericQuestion.create!(
+  pregunta: "Un músico toca una nota musical que tiene una frecuencia de (FRECUENCIA) Hz. Si esta nota se propaga como una onda sonora en el aire a una velocidad de (VELOCIDAD) metros por segundo, calcula:
+  \n
+  a) ¿Cuál es la longitud de onda de esta onda sonora?
+  \n
+  b) Si la frecuencia de la nota se duplica, ¿cómo cambiará la longitud de onda?
+  ",
+  image_data: image_data,
+  difficulty: 1,
+  topic: "TEMA 2"
+)
+
+# Create Parameters for the question
+Parameter.create!(
+  [
+    {name: '(VELOCIDAD)', number: wave_speed, numeric_question: nq },
+    {name: '(FRECUENCIA)', number: frequency, numeric_question: nq }
+  ]
+)
+
+
+# Create a NumericAnswer with the calculated wavelength
+NumericAnswer.create!(
+  respuesta: wavelength,
+  correct: true,
+  numeric_question: nq,
+  equation: "v / f",
+  hint: 'Recuerda que la longitud de onda es la distancia entre dos'
+)
+
+NumericAnswer.create!(
+  respuesta: (wavelength/2).round(2),
+  correct: true,
+  numeric_question: nq,
+  equation: "v / f",
+  hint: 'Recuerda que la longitud de onda es la distancia entre dos'
+)
 # db/seeds.rb
 
 # # Create a NumericQuestion

@@ -13,6 +13,6 @@ class NumericQuestion < ApplicationRecord
   end
 
   def question_with_values
-    question.gsub(/_/) { parameters.shift.value }
+    # question.gsub(/_/) { parameters.shift.value }
   end
 end

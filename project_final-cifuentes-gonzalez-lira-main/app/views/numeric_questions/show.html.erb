@@ -1,10 +1,20 @@
-
 <div class="container">
-<%= form_with(url: numeric_question_answer_path(@numeric_question), method: :post) do |form| %>
-  <div class="form-group">
-    <label><%= @numeric_question.question_with_values %></label>
-    <%= form.number_field :answer, class: 'form-control', placeholder: 'Enter your answer here' %>
-  </div>
-  <%= form.submit 'Submit', class: 'btn btn-primary' %>
-<% end %>
+  <h6>TAREA NUMERICA</h6>
+    <% @parameters.each do |d| %>
+      <% @numeric_question.pregunta = @numeric_question.pregunta.gsub(d.name, d.number.to_s) %>
+    <% end %>
+    <%= @numeric_question.pregunta %>
+    <% @numeric_question.save  %>
+
+    <%= form_with url: {action: "submit_answer", id: @numeric_question.id}, method: :post do |f| %>
+    <br>
+      <% @numeric_question.numeric_answers.each do |answer| %>
+        <%= f.label "answer_#{answer.id}", "Respuesta" %>
+        <%= f.text_field "answers[#{answer.id}]", id: "answer_#{answer.id}" %>
+        <br>
+      <% end %>
+      <br>
+      <%= f.submit "Answer", class:'btn btn-primary btn-sm' %>
+    <% end %>
+
 </div>
