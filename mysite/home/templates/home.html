@@ -8,27 +8,26 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    <title>Quiz app</title>
+    <title>Quiz App</title>
   </head>
   <body>
-    <h1>Home</h1>
-    <div class="container mt-5 pt-5">
-        <div class="col-md-6">
-            <form>
+    {% include 'static_pages/navbar.html' %}
 
-                <div class="form-group" >
-                    <label>Select Category</label>
-                    <select name="category" class="form-control">
-                        <option value="CHoose">choose</option>
-                        {%for category in categories%}
-                        <option value="{{category.category_name}}">{{category.category_name}} </option> 
-                        {%endfor%}
-                    </select>   
-                </div>
-                <button class="btn btn-danger mt-3">Submit</button>
+    <div class="jumbotron jumbotron-fluid " style='margin:auto; width:40rem; margin-top:3rem;'>
+      <div class="text-center">
+          <h1 class="display-4"><strong>ITS</strong></h1>
+          <i class="fa-solid fa-laptop-code fa-2xl"></i>
+          <p></p>
+          <p class="lead text-center">Vuelvete experto en Mecanica y Ondas</p>
+          <p></p>
+      </div>
+    </div>
 
-            </form>
-        </div>
+    <div class="container" style="margin:auto;">
+      <form method="post" action="{% url 'do_task' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger mt-3">Start Task</button>
+      </form>
     </div>
 
     <!-- Optional JavaScript -->

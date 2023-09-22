@@ -16,10 +16,10 @@
             <!-- <input type="hidden" id="current-question-index" value="0"> -->
             <div class="card mt-4">
                 <div class="card-header" id="question-text">
-                    {{ questions.counter.question_text }}
+                    {{ questions.question_text }}
                 </div>
                 <ul class="list-group list-group-flush" id="answer-list">
-                    {% for answer in questions.counter.get_answers %}
+                    {% for answer in questions.get_answers %}
                     <li class="list-group-item">
                         <input type="radio" name="answer" value="{{ answer.answer }}"> {{ answer.answer }}
                     </li>
@@ -35,7 +35,3 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 </body>
 </html>
-
-
-
-

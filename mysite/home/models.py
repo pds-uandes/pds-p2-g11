@@ -4,6 +4,7 @@ import uuid
 import random
 from django.db.models import Q
 
+
 class BaseModel(models.Model):
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4 , editable=False)
     created_at = models.DateField(auto_now_add=True)
@@ -14,12 +15,12 @@ class BaseModel(models.Model):
 
 class Task(BaseModel):
     tries = {
-        'first_try_answered': False,
-        'second_try': False,
-        'second_try_answered': False,
-        'user_answered': False,
+        'first_try_answered': False, # true
+        'second_try': False, # score 5/5 o 100% de las preguntas = True
+        'second_try_answered': False, # ""
     }
 
+    counter = models.IntegerField(default=0)
     score = models.IntegerField(default=0)
 
     def __str__(self) -> str:
@@ -33,11 +34,14 @@ class Task(BaseModel):
         self.trys[parameter] = True
         self.save()
 
-    def add_questions(self, level, theme, type, difficulty):
+    def add_questions(self, level, task_type, difficulty):
+        if level == 0:
+            theme = 1
+
         question_query = Q(difficulty=difficulty) & Q(theme=theme)
         # type 0: multiple choice questions
         # type 1: numeric question
-        if type == 0:
+        if task_type == 0:
             questions = Question.objects.filter(question_query).order_by('?')[:5]
 
         # Assign the questions to the task
@@ -46,6 +50,18 @@ class Task(BaseModel):
                 question.save()
 
             return questions
+
+    def generate_question(self):
+        #No hay mas preguntas se va a results page
+        #Segun el json que tiene te entrega una de las preguntas
+
+        if self.counter == 5:
+            return False
+
+
+        return True
+
+
 
 class Question(BaseModel):
     DIFFICULTY_CHOICES = [
@@ -61,8 +77,8 @@ class Question(BaseModel):
         (5, 'Energias e info. transferida')]
 
     task = models.ForeignKey(Task, related_name='task_questions', on_delete=models.CASCADE, null=True, blank=True)
-    question_text = models.CharField(max_length=100)
-    hint = models.CharField(max_length=100, null=True, blank=True)
+    question_text = models.CharField(max_length=1000)
+    hint = models.CharField(max_length=200, null=True, blank=True)
     difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
     theme = models.IntegerField(choices=THEME_CHOICES, default=1)
 
@@ -83,7 +99,7 @@ class Question(BaseModel):
 
 class Answer(BaseModel):
     question = models.ForeignKey(Question,related_name='question_answer', on_delete=models.CASCADE)
-    answer = models.CharField(max_length=100)
+    answer = models.CharField(max_length=200)
     is_correct = models.BooleanField(default=False)
 
     def __str__(self) -> str:
