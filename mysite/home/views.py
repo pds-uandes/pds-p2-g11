@@ -2,7 +2,53 @@ from django.shortcuts import render, redirect
 from .models import *
 import random
 from django.http import JsonResponse, HttpResponse
+from django.contrib.auth.views import LoginView
+from django.views.generic.edit import CreateView
+from django.urls import reverse_lazy
+from .models import CustomUser
+from .forms import CustomUserCreationForm
+from django.contrib.auth import login
+from django.contrib.auth import authenticate, login
 
+class UserLoginView(LoginView):
+    template_name = 'login.html'
+    fields = '__all__'
+    redirect_authenticated_user = True
+
+    def get_success_url(self):
+        return reverse_lazy('home')
+
+class UserRegisterView(CreateView):
+    form_class = CustomUserCreationForm
+    template_name = 'register.html'
+
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        user.is_student = True
+        user.save()
+        
+        valid = super().form_valid(form)  # Call super().form_valid(form) first
+
+        # Authenticate the user
+        authenticated_user = authenticate(
+            username=form.cleaned_data['username'],
+            password=form.cleaned_data['password1'],  # Assuming you're using Django's UserCreationForm or similar
+        )
+        
+        # Log in the user
+        login(self.request, authenticated_user)
+        
+        return valid  # Return the result of super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('home')
+
+
+
+
+from django.contrib.auth.decorators import login_required
+
+@login_required(login_url='/login/')
 def home(request):
     context = {'tasks': Task.objects.all()}
 

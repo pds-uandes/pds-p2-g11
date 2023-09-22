@@ -3,6 +3,7 @@ import uuid
 # Create your models here.
 import random
 from django.db.models import Q
+from django.contrib.auth.models import AbstractUser
 
 class BaseModel(models.Model):
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4 , editable=False)
@@ -12,6 +13,14 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
+
+class CustomUser(AbstractUser):
+    is_teacher = models.BooleanField(default=False)
+    is_student = models.BooleanField(default=False)
+    name = models.CharField(max_length=255)
+    second_name = models.CharField(max_length=255)
+
+    
 class Task(BaseModel):
     tries = {
         'first_try_answered': False,
