@@ -35,7 +35,8 @@ class Task(BaseModel):
 
     def add_questions(self, level, theme, type, difficulty):
         question_query = Q(difficulty=difficulty) & Q(theme=theme)
-
+        # type 0: multiple choice questions
+        # type 1: numeric question
         if type == 0:
             questions = Question.objects.filter(question_query).order_by('?')[:5]
 
@@ -61,6 +62,7 @@ class Question(BaseModel):
 
     task = models.ForeignKey(Task, related_name='task_questions', on_delete=models.CASCADE, null=True, blank=True)
     question_text = models.CharField(max_length=100)
+    hint = models.CharField(max_length=100, null=True, blank=True)
     difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
     theme = models.IntegerField(choices=THEME_CHOICES, default=1)
 
@@ -73,7 +75,6 @@ class Question(BaseModel):
         data = []
         for answer_obj in answer_objs:
             data.append({
-                'hint': answer_obj.hint,
                 "answer": answer_obj.answer,
                 "is_correct": answer_obj.is_correct
             })
@@ -82,7 +83,6 @@ class Question(BaseModel):
 
 class Answer(BaseModel):
     question = models.ForeignKey(Question,related_name='question_answer', on_delete=models.CASCADE)
-    hint = models.CharField(max_length=100, default='')
     answer = models.CharField(max_length=100)
     is_correct = models.BooleanField(default=False)
 
