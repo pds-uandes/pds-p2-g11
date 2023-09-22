@@ -1,9 +1,5 @@
 from django.contrib import admin
-
-# Register your models here.
 from .models import *
-
-admin.site.register(Category)
 
 class AnswerAdmin(admin.StackedInline):
     model = Answer
@@ -11,7 +7,9 @@ class AnswerAdmin(admin.StackedInline):
 class QuestionAdmin(admin.ModelAdmin):
     inlines = [AnswerAdmin]
 
+class TaskAdmin(admin.ModelAdmin):
+    pass
 
-
+admin.site.register(Task, TaskAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Answer)
