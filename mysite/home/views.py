@@ -3,15 +3,6 @@ from .models import *
 import random
 from django.http.response import JsonResponse,HttpResponse
 
-# Create your views here.
-
-# {
-#     'data':[
-#         {}
-#     ]
-# }
-
-
 
 def home(request):
     context = {'categories': Category.objects.all()}
