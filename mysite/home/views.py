@@ -7,8 +7,12 @@ from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy
 from .models import CustomUser
 from .forms import CustomUserCreationForm
-from django.contrib.auth import login
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.shortcuts import render
+from django.views import View
+from django.http import HttpResponseForbidden
 
 class UserLoginView(LoginView):
     template_name = 'login.html'
@@ -44,7 +48,13 @@ class UserRegisterView(CreateView):
         return reverse_lazy('home')
 
 
-
+@method_decorator(login_required, name='dispatch')
+class StudentListView(View):
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_teacher:
+            return HttpResponseForbidden("You are not allowed to view this page.")
+        students = CustomUser.objects.filter(is_student=True)
+        return render(request, 'students.html', {'students': students})
 
 from django.contrib.auth.decorators import login_required
 
