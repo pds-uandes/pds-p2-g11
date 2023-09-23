@@ -54,7 +54,7 @@ class Task(BaseModel):
 
         # Assign the questions to the task
             for question in questions:
-                question.task = self
+                # question.task = self
                 question.save()
 
             return questions

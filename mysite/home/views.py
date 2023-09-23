@@ -109,8 +109,8 @@ def do_task(request):
     if 'task_id' not in request.session:
         # If not, create a new task
         task = Task()
-        questions = task.add_questions(json_user['level'], json_user['type_task'], json_user['difficulty'])
 
+        questions = task.add_questions(json_user['level'], json_user['type_task'], json_user['difficulty'])
 
         task.save()
         task_id = str(task.uid)
@@ -123,6 +123,7 @@ def do_task(request):
         task.counter += 1
         task.save()
 
+    print(questions)
     if task.counter >= 5:
         return render(request, 'results.html', {'questions': questions})
 
