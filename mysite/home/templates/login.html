@@ -1,12 +1,15 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-  <h2>Login</h2>
-  <form method="post">
-  {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
-  </form>
-  <a href="{% url 'register' %}">Register</a>
-
+  <div class="container">
+    <h2 class="my-4">Login</h2>
+    <form method="post" class="needs-validation" novalidate>
+      {% csrf_token %}
+      <div class="mb-3">
+        {{ form.as_p }}
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+    <a href="{% url 'register' %}" class="btn btn-link">Register</a>
+  </div>
 {% endblock %}
