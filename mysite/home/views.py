@@ -84,13 +84,16 @@ def do_task(request):
     'level': 0,
     'type_task': 0,
     }
+
     if 'task_id' not in request.session:
         # If not, create a new task
         task = Task()
+        questions = task.add_questions(json_user['level'], json_user['type_task'], json_user['difficulty'])
+
+
         task.save()
         task_id = str(task.uid)
         request.session['task_id'] = task_id
-        request.session['question_number'] = 0
     else:
         # If there is an active task, fetch the task and question number
         task_id = request.session['task_id']
@@ -99,19 +102,10 @@ def do_task(request):
         task.counter += 1
         task.save()
 
-    question_number = request.session.get('question_number', 0)  # Get question_number if it exists, otherwise default to 0
-
-    # Check if the task has reached 5 questions, if so, redirect to results page
     if task.counter >= 5:
-        return render(request, 'results.html', {'questions': question_number})
+        return render(request, 'results.html', {'questions': questions})
 
-    # Fetch a new question for the current task and question number
-    questions = task.add_questions(json_user['level'], json_user['type_task'], json_user['difficulty'])
-
-    # Update the session variable with the incremented question number
-    request.session['question_number'] = question_number + 1
-
-    return render(request, 'new_quiz.html', {'questions': questions[0]})
+    return render(request, 'new_quiz.html', {'questions': questions[task.counter]})
 
 # Create a view for the results page
 def results(request):

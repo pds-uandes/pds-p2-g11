@@ -76,7 +76,7 @@ class Question(BaseModel):
         (4, 'Ecuacion de la Onda'),
         (5, 'Energias e info. transferida')]
 
-    task = models.ForeignKey(Task, related_name='task_questions', on_delete=models.CASCADE, null=True, blank=True)
+    task = models.ForeignKey(Task, related_name='task_questions', on_delete=models.SET_NULL, null=True, blank=True)
     question_text = models.CharField(max_length=1000)
     hint = models.CharField(max_length=200, null=True, blank=True)
     difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
