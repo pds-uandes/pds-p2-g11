@@ -110,6 +110,7 @@ def do_task(request):
         # If not, create a new task
         task = Task()
         task.questions.clear()
+        task.wrongs.clear()
         task.save()
         task_id = str(task.uid)
         request.session['task_id'] = task_id
@@ -142,18 +143,24 @@ def do_task(request):
                 task.score += 1
                 
             else:
+                if question not in task.wrongs:
+                    task.wrongs.append(question)
                 print("The selected answer is INCORRECT.")
 
-
+        request.session['wrongs'] = len(task.wrongs)
         task.save()
+
+
+    if task.counter >= 5:
+        return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': True})
+
 
     # get the questions
     question = task.add_question(json_user['level'], json_user['type_task'], json_user['difficulty'])
-    task.questions.append(question[0])
+    while question in task.questions:
+        question = task.add_question(json_user['level'], json_user['type_task'], json_user['difficulty'])
+    task.questions.append(question)
     task.save()
-
-    if task.counter >= 5:
-        return render(request, 'results.html', {'questions': task.questions, 'score': task.score})
 
     return render(request, 'new_quiz.html', {'question': task.questions[-1], 'counter': task.counter + 1})
 
@@ -171,3 +178,52 @@ def results(request):
         score = None
 
     return render(request, 'results.html', {'score': score})
+
+
+def redo_task(request):
+    task_id = request.session.get('task_id')
+    if task_id:
+        task = Task.objects.get(pk=task_id)
+        
+        print(task.wrongs)
+        print("Task found!")
+    else:
+        print("No task found!")
+
+    task.wrongs_counter += 1
+    if task.wrongs_counter > 0:
+        question_text = request.POST.get('question')
+        question = Question.objects.get(question_text=question_text)
+        selected_answer = request.POST.get('selected_answer')
+
+        # Get the correct answer from the question's answers
+        correct_answer = None
+
+        for answer in question.get_answers():
+            if answer['is_correct']:
+                correct_answer = answer['answer']
+                break
+
+        print(f"Correct answer: {correct_answer}")
+        print(f"Selected answer: {selected_answer}")
+
+        # Compare the selected answer with the correct answer
+        if selected_answer == correct_answer:
+            print("The selected answer is CORRECT.")
+            task.score += 1
+            task.wrongs.remove(question)
+    
+    task.save()
+    print('================== task wrong counter =======')
+    print(task.wrongs_counter)
+    print(task.wrongs)
+    print(len(task.wrongs))
+
+    wrongs = request.session['wrongs']
+    print(wrongs)
+
+    if task.wrongs_counter > wrongs:
+        return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
+
+    return render(request, 'new_quiz.html', {'question': task.wrongs[task.wrongs_counter], 'counter': task.wrongs_counter + 1})
+    #si no quedan, lo tira al results final y de ahi a home

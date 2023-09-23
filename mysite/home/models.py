@@ -33,8 +33,10 @@ class Task(BaseModel):
         'second_try_answered': False,
         'user_answered': False,
     }
+    wrongs = []        
     questions = []
     counter = models.IntegerField(default=0)
+    wrongs_counter = models.IntegerField(default=-1)
     score = models.IntegerField(default=0)
 
     def __str__(self) -> str:
@@ -56,7 +58,7 @@ class Task(BaseModel):
         # type 0: multiple choice questions
         # type 1: numeric question
         if task_type == 0:
-            question = Question.objects.filter(question_query).order_by('?')[:1]
+            question = Question.objects.filter(question_query).order_by('?')[0]
             return question
 
     def generate_question(self):
@@ -108,3 +110,6 @@ class Answer(BaseModel):
 
     def __str__(self) -> str:
         return self.answer
+
+# class NumericQuestion(BaseModel):
+#     question_text = models.CharField(max_length=1000)
