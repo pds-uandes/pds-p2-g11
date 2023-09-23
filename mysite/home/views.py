@@ -50,9 +50,14 @@ from django.contrib.auth.decorators import login_required
 
 @login_required(login_url='/login/')
 def home(request):
+    #borrar la task actual
+    if 'task_id' in request.session:
+        del request.session['task_id']
+
     context = {'tasks': Task.objects.all()}
 
     if request.GET.get('task'):
+        # delete the task_id from the session
         return redirect(f"quiz/?task={request.GET.get('task')}")
 
     return render(request, 'home.html', context)
@@ -99,19 +104,12 @@ def get_quiz(request):
     return HttpResponse("Something went wrong!")
 
 def do_task(request):
-    # Check if there is an active task in the session
-    json_user = {
-    'difficulty': 1,
-    'level': 0,
-    'type_task': 0,
-    }
+    json_user = request.user.json_user
 
     if 'task_id' not in request.session:
         # If not, create a new task
         task = Task()
-
-        questions = task.add_questions(json_user['level'], json_user['type_task'], json_user['difficulty'])
-
+        task.questions.clear()
         task.save()
         task_id = str(task.uid)
         request.session['task_id'] = task_id
@@ -121,13 +119,36 @@ def do_task(request):
         task_id = uuid.UUID(task_id)  # Convert the stored string back to a UUID
         task = Task.objects.get(pk=task_id)
         task.counter += 1
+
+        if request.method == "POST":
+            correct_answer = request.POST.get('correct_answer')
+            answer_text = request.POST.get('answer_text')
+            question_text = request.POST.get('question_text')
+
+            print("La answer es:")
+            print(correct_answer)
+            print("La answer_text es:")
+            print(answer_text)
+            print("La question_text es:")
+            print(question_text)
+
+            if correct_answer == "True":
+                task.score += 1
+            print("El score es:")
+            print(task.score)
+
         task.save()
 
-    print(questions)
-    if task.counter >= 5:
-        return render(request, 'results.html', {'questions': questions})
+    # get the questions
+    question = task.add_question(json_user['level'], json_user['type_task'], json_user['difficulty'])
+    task.questions.append(question[0])
+    print(task.questions)
+    task.save()
 
-    return render(request, 'new_quiz.html', {'questions': questions[task.counter]})
+    if task.counter >= 5:
+        return render(request, 'results.html', {'questions': task.questions, 'score': task.score})
+
+    return render(request, 'new_quiz.html', {'question': task.questions[-1], 'counter': task.counter + 1})
 
 # Create a view for the results page
 def results(request):

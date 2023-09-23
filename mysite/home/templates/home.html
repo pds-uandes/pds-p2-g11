@@ -22,10 +22,11 @@
       </div>
     </div>
 
-    <div class="container" style="margin:auto;">
+    <div class="container text-center" style="margin:auto;">
       <form method="post" action="{% url 'do_task' %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger mt-3">Start Task</button>
+
+        <button type="submit" class="btn btn-danger mt-2">Start Task</button>
       </form>
     </div>
 

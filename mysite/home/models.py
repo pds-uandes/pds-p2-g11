@@ -19,6 +19,11 @@ class CustomUser(AbstractUser):
     is_student = models.BooleanField(default=False)
     name = models.CharField(max_length=255)
     second_name = models.CharField(max_length=255)
+    json_user = {
+    'difficulty': 1,
+    'level': 0,
+    'type_task': 0,
+    }
 
 
 class Task(BaseModel):
@@ -28,6 +33,7 @@ class Task(BaseModel):
         'second_try_answered': False,
         'user_answered': False,
     }
+    questions = []
     counter = models.IntegerField(default=0)
     score = models.IntegerField(default=0)
 
@@ -42,7 +48,7 @@ class Task(BaseModel):
         self.trys[parameter] = True
         self.save()
 
-    def add_questions(self, level, task_type, difficulty):
+    def add_question(self, level, task_type, difficulty):
         if level == 0:
             theme = 1
 
@@ -50,14 +56,8 @@ class Task(BaseModel):
         # type 0: multiple choice questions
         # type 1: numeric question
         if task_type == 0:
-            questions = Question.objects.filter(question_query).order_by('?')[:5]
-
-        # Assign the questions to the task
-            for question in questions:
-                # question.task = self
-                question.save()
-
-            return questions
+            question = Question.objects.filter(question_query).order_by('?')[:1]
+            return question
 
     def generate_question(self):
         #No hay mas preguntas se va a results page

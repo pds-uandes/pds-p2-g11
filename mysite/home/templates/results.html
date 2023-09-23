@@ -1,0 +1,25 @@
+ {% extends "base_generic.html" %}
+
+{% block content %}
+<div class="container" style="margin:auto;">
+    <div class="container text-center" style="margin:auto;">
+        <form method="post" action="{% url 'home' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success mt-3">Home</button>
+        </form>
+    </div>
+</div>
+
+<div class="container text-center mt-4">
+    <h2>Your Score: {{ score }}</h2>
+    {% for question in questions %}
+    <div class="card-header">
+        <p>✅</p>
+        {{ question.question_text }}
+    </div>
+        {{ question.hint }}
+        {% endfor %}
+
+</div>
+
+{% endblock %}
