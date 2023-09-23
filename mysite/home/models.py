@@ -33,7 +33,8 @@ class Task(BaseModel):
         'second_try_answered': False,
         'user_answered': False,
     }
-    wrongs = []        
+    wrongs = []
+    wrongs_permanent = []
     questions = []
     counter = models.IntegerField(default=0)
     wrongs_counter = models.IntegerField(default=-1)

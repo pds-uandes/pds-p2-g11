@@ -103,6 +103,7 @@ def get_quiz(request):
         print(e)
     return HttpResponse("Something went wrong!")
 
+# ================== DO TASK ==================
 def do_task(request):
     json_user = request.user.json_user
 
@@ -141,15 +142,15 @@ def do_task(request):
             if selected_answer == correct_answer:
                 print("The selected answer is CORRECT.")
                 task.score += 1
-                
+
             else:
                 if question not in task.wrongs:
                     task.wrongs.append(question)
+                    task.wrongs_permanent.append(question)
                 print("The selected answer is INCORRECT.")
 
         request.session['wrongs'] = len(task.wrongs)
         task.save()
-
 
     if task.counter >= 5:
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': True})
@@ -162,7 +163,7 @@ def do_task(request):
     task.questions.append(question)
     task.save()
 
-    return render(request, 'new_quiz.html', {'question': task.questions[-1], 'counter': task.counter + 1})
+    return render(request, 'new_quiz.html', {'question': task.questions[-1], 'counter': task.counter + 1, 'redo': True})
 
 
 # Create a view for the results page
@@ -179,12 +180,12 @@ def results(request):
 
     return render(request, 'results.html', {'score': score})
 
-
+# =================== REDO TASK VIEW =====================
 def redo_task(request):
     task_id = request.session.get('task_id')
     if task_id:
         task = Task.objects.get(pk=task_id)
-        
+
         print(task.wrongs)
         print("Task found!")
     else:
@@ -212,18 +213,12 @@ def redo_task(request):
             print("The selected answer is CORRECT.")
             task.score += 1
             task.wrongs.remove(question)
-    
     task.save()
     print('================== task wrong counter =======')
-    print(task.wrongs_counter)
-    print(task.wrongs)
-    print(len(task.wrongs))
 
-    wrongs = request.session['wrongs']
-    print(wrongs)
-
-    if task.wrongs_counter > wrongs:
+    if task.wrongs_counter >= len(task.wrongs_permanent):
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
 
-    return render(request, 'new_quiz.html', {'question': task.wrongs[task.wrongs_counter], 'counter': task.wrongs_counter + 1})
+    print(task.wrongs_permanent[task.wrongs_counter])
+    return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False})
     #si no quedan, lo tira al results final y de ahi a home
