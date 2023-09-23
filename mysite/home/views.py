@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import *
 import random
 from django.http import JsonResponse, HttpResponse
@@ -10,7 +10,6 @@ from .forms import CustomUserCreationForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.shortcuts import render
 from django.views import View
 from django.http import HttpResponseForbidden
 
@@ -60,12 +59,17 @@ from django.contrib.auth.decorators import login_required
 
 @login_required(login_url='/login/')
 def home(request):
-    context = {'tasks': Task.objects.all()}
-
+    tasks = Task.objects.all()
+    students = CustomUser.objects.filter(is_student=True)
     if request.GET.get('task'):
         return redirect(f"quiz/?task={request.GET.get('task')}")
-
+    
+    context = {'tasks': tasks, 'students': students}
     return render(request, 'home.html', context)
+
+def student_profile(request, student_id):
+    student = get_object_or_404(CustomUser, pk=student_id)
+    return render(request, 'student_profile.html', {'student': student})
 
 def quiz(request):
     task_uid = request.GET.get('task')

@@ -2,18 +2,29 @@
 <html>
 <head>
     <title>Student List</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Student List</h1>
+    <div class="container">
+        <h1 class="mt-4">Student List</h1>
 
-    {% if students %}
-    <ul>
-        {% for student in students %}
-        <li>{{ student.name }} {{ student.second_name }}</li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    <p>No students found.</p>
-    {% endif %}
+        {% if students %}
+        <ul class="list-group mt-4">
+            {% for student in students %}
+            <li class="list-group-item">
+                <form action="{% url 'student_profile' student.id %}" method="get">
+                    <button type="submit" class="btn btn-link">{{ student.name }} {{ student.second_name }}</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="mt-4">No students found.</p>
+        {% endif %}
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>
