@@ -4,7 +4,6 @@
 <div class="container">
     <form id="quiz-form" method="post" action="{% url 'do_task' %}">
         {% csrf_token %}
-        <!-- <input type="hidden" id="current-question-index" value="0"> -->
         <div class="card mt-4">
             <div class="card-header">
                 {{counter}} of 5 questions
@@ -15,47 +14,18 @@
             <ul class="list-group list-group-flush" id="answer-list">
                 {% for answer in question.get_answers %}
                 <li class="list-group-item">
-                    <input type="radio" name="answer" value="{{ answer.answer }}">
-                    <input type="hidden" name="correct_answer" value="{{ answer.is_correct }}">
-                    <input type="hidden" name="answer_text" value="{{ answer.answer }}">
-                    <input type="hidden" name="question_text" value="{{ question.question_text }}">
-                    {{ answer.answer }}
-
+                    <input type="radio" name="selected_answer" value="{{ answer.answer }}" required> {{ answer.answer }}
+                    <input type="hidden" name="is_correct_{{ forloop.counter }}" value="{{ answer.is_correct }}" > 
+                    <input type="hidden" name="question" value="{{ question.question_text }}" > 
 
                 </li>
                 {% endfor %}
             </ul>
             <div class="card-footer">
                 <button type="submit" id="next-button" class = 'btn btn-secondary btn-sm'>Next</button>
-
-
                 <a href="{% url 'home' %}" class="btn btn-danger btn-sm">Home</a>
             </div>
         </div>
     </form>
 </div>
 {% endblock %}
-
-<script>
-    // Get all radio buttons
-let radios = document.getElementsByName('answer');
-
-// Add a 'change' event listener to each radio button
-for(let i = 0; i < radios.length; i++) {
-    radios[i].addEventListener('change', function() {
-        // Get the parent list item
-        let listItem = this.parentNode;
-
-        // Get the hidden inputs
-        let correctAnswerInput = listItem.querySelector('input[name="correct_answer"]');
-        let answerTextInput = listItem.querySelector('input[name="answer_text"]');
-        let questionTextInput = listItem.querySelector('input[name="question_text"]');
-
-        // Change the value of the hidden inputs
-        correctAnswerInput.value = this.value;
-        answerTextInput.value = this.value;
-        questionTextInput.value = this.value;
-    });
-}
-
-</script>

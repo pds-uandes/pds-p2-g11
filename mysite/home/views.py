@@ -121,28 +121,35 @@ def do_task(request):
         task.counter += 1
 
         if request.method == "POST":
-            correct_answer = request.POST.get('correct_answer')
-            answer_text = request.POST.get('answer_text')
-            question_text = request.POST.get('question_text')
+            question_text = request.POST.get('question')
+            question = Question.objects.get(question_text=question_text)
+            selected_answer = request.POST.get('selected_answer')
 
-            print("La answer es:")
-            print(correct_answer)
-            print("La answer_text es:")
-            print(answer_text)
-            print("La question_text es:")
-            print(question_text)
+            # Get the correct answer from the question's answers
+            correct_answer = None
 
-            if correct_answer == "True":
+            for answer in question.get_answers():
+                if answer['is_correct']:
+                    correct_answer = answer['answer']
+                    break
+
+            print(f"Correct answer: {correct_answer}")
+            print(f"Selected answer: {selected_answer}")
+
+            # Compare the selected answer with the correct answer
+            if selected_answer == correct_answer:
+                print("The selected answer is CORRECT.")
                 task.score += 1
-            print("El score es:")
-            print(task.score)
+                
+            else:
+                print("The selected answer is INCORRECT.")
+
 
         task.save()
 
     # get the questions
     question = task.add_question(json_user['level'], json_user['type_task'], json_user['difficulty'])
     task.questions.append(question[0])
-    print(task.questions)
     task.save()
 
     if task.counter >= 5:
@@ -150,7 +157,10 @@ def do_task(request):
 
     return render(request, 'new_quiz.html', {'question': task.questions[-1], 'counter': task.counter + 1})
 
+
 # Create a view for the results page
+
+
 def results(request):
     # Retrieve the task and its score here to display on the results page
     task_id = request.session.get('task_id')
