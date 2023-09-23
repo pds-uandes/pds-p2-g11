@@ -4,6 +4,9 @@ import uuid
 import random
 from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
+from datetime import timedelta
+
 
 class BaseModel(models.Model):
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4 , editable=False)
@@ -19,8 +22,10 @@ class CustomUser(AbstractUser):
     is_student = models.BooleanField(default=False)
     name = models.CharField(max_length=255)
     second_name = models.CharField(max_length=255)
-
-
+    last_login_time = models.DateTimeField(null=True, blank=True)
+    last_logout_time = models.DateTimeField(null=True, blank=True)
+    total_time_spent = models.DurationField(default=timedelta())
+    
 class Task(BaseModel):
     tries = {
         'first_try_answered': False,
@@ -28,7 +33,7 @@ class Task(BaseModel):
         'second_try_answered': False,
         'user_answered': False,
     }
-    counter = models.IntegerField(default=0)
+
     score = models.IntegerField(default=0)
 
     def __str__(self) -> str:
@@ -42,30 +47,19 @@ class Task(BaseModel):
         self.trys[parameter] = True
         self.save()
 
-    def add_questions(self, level, task_type, difficulty):
-        if level == 0:
-            theme = 1
-
+    def add_questions(self, level, theme, type, difficulty):
         question_query = Q(difficulty=difficulty) & Q(theme=theme)
         # type 0: multiple choice questions
         # type 1: numeric question
-        if task_type == 0:
+        if type == 0:
             questions = Question.objects.filter(question_query).order_by('?')[:5]
 
         # Assign the questions to the task
             for question in questions:
-                # question.task = self
+                question.task = self
                 question.save()
 
             return questions
-
-    def generate_question(self):
-        #No hay mas preguntas se va a results page
-        #Segun el json que tiene te entrega una de las preguntas
-
-        if self.counter == 5:
-            return False
-        return True
 
 class Question(BaseModel):
     DIFFICULTY_CHOICES = [
@@ -80,9 +74,9 @@ class Question(BaseModel):
         (4, 'Ecuacion de la Onda'),
         (5, 'Energias e info. transferida')]
 
-    task = models.ForeignKey(Task, related_name='task_questions', on_delete=models.SET_NULL, null=True, blank=True)
-    question_text = models.CharField(max_length=1000)
-    hint = models.CharField(max_length=200, null=True, blank=True)
+    task = models.ForeignKey(Task, related_name='task_questions', on_delete=models.CASCADE, null=True, blank=True)
+    question_text = models.CharField(max_length=100)
+    hint = models.CharField(max_length=100, null=True, blank=True)
     difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
     theme = models.IntegerField(choices=THEME_CHOICES, default=1)
 
@@ -103,7 +97,7 @@ class Question(BaseModel):
 
 class Answer(BaseModel):
     question = models.ForeignKey(Question,related_name='question_answer', on_delete=models.CASCADE)
-    answer = models.CharField(max_length=200)
+    answer = models.CharField(max_length=100)
     is_correct = models.BooleanField(default=False)
 
     def __str__(self) -> str:

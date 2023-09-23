@@ -12,6 +12,35 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.http import HttpResponseForbidden
+from django.contrib.auth.views import LoginView, LogoutView
+from django.utils import timezone
+from django.contrib.auth.views import LogoutView
+from django.utils import timezone
+
+class CustomLoginView(LoginView):
+    def form_valid(self, form):
+        remember_me = self.request.POST.get('remember_me')
+
+        if not remember_me:
+            self.request.session.set_expiry(0)
+            self.request.session.modified = True
+
+        return super().form_valid(form)
+
+
+class CustomLogoutView(LogoutView):
+    def dispatch(self, request, *args, **kwargs):
+        # Update the last logout time and calculate session duration
+        if request.user.is_authenticated:
+            request.user.last_logout_time = timezone.now()
+            if request.user.last_login_time is not None:
+                session_duration = request.user.last_logout_time - request.user.last_login_time
+                request.user.total_time_spent += session_duration
+            request.user.save()
+
+        return super().dispatch(request, *args, **kwargs)
+
+
 
 class UserLoginView(LoginView):
     template_name = 'login.html'
@@ -55,7 +84,7 @@ class StudentListView(View):
         students = CustomUser.objects.filter(is_student=True)
         return render(request, 'students.html', {'students': students})
 
-from django.contrib.auth.decorators import login_required
+
 
 @login_required(login_url='/login/')
 def home(request):
@@ -69,7 +98,11 @@ def home(request):
 
 def student_profile(request, student_id):
     student = get_object_or_404(CustomUser, pk=student_id)
-    return render(request, 'student_profile.html', {'student': student})
+    if student.last_login_time and student.last_logout_time:
+        usage_time = student.last_logout_time - student.last_login_time
+    else:
+        usage_time = "Not available"
+    return render(request, 'student_profile.html', {'student': student, 'usage_time': usage_time})
 
 def quiz(request):
     task_uid = request.GET.get('task')
