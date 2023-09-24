@@ -194,8 +194,6 @@ def do_task(request):
                     task.wrongs.append(question)
                     task.wrongs_permanent.append(question)
                 print("The selected answer is INCORRECT.")
-
-        request.session['wrongs'] = len(task.wrongs)
         task.save()
 
     if task.counter >= 5:
@@ -254,11 +252,16 @@ def redo_task(request):
         print(f"Correct answer: {correct_answer}")
         print(f"Selected answer: {selected_answer}")
 
+        print(task.wrongs)
+
         # Compare the selected answer with the correct answer
         if selected_answer == correct_answer:
             print("The selected answer is CORRECT.")
             task.score += 1
             task.wrongs.remove(question)
+
+        print(task.wrongs)
+        print(task.wrongs_permanent)
     task.save()
 
     if task.wrongs_counter >= len(task.wrongs_permanent):

@@ -1,7 +1,6 @@
 from django.db import models
 import uuid
 # Create your models here.
-import sympy
 import random
 from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
@@ -188,11 +187,16 @@ class DinamicAnswer(BaseModel):
 
     def equation_value(self):
         # Parse the equation
-        expr = sympy.sympify(self.equation)
+        for placeholder, value in self.dic.items():
+            self.equation = self.equation.replace(placeholder, str(value))
 
-        result = expr.subs(self.dic)
+        try:
+            result = eval(self.equation)
+            self.result = [round(result.evalf(), 3) - round(result.evalf(), 3)*0.05, round(result.evalf(), 3) + round(result.evalf(), 3)*0.05]
+        except Exception as e:
+            return f"Error: {str(e)}"
 
-        self.result = [round(result.evalf(), 3) - round(result.evalf(), 3)*0.05, round(result.evalf(), 3) + round(result.evalf(), 3)*0.05]
+
 
 class Parameters(BaseModel):
     question = models.ForeignKey(Question,related_name='dinamic_question_parameters', on_delete=models.CASCADE)
@@ -205,7 +209,7 @@ class Parameters(BaseModel):
         max_value = self.max_val
         value = random.randint(min_value, max_value)
         self.value = value
-    
+
     def __str__(self) -> str:
         return self.parameter
 
