@@ -163,9 +163,8 @@ class DinamicQuestion(BaseModel):
             answer_obj.equation_value()
             print(answer_obj.parameters)
             data.append({
-                "answer": answer_obj.answer,
+                'equation': answer_obj.equation,
                 'metrics': answer_obj.metrics,
-                'parameters': answer_obj.parameters,
                 'result': answer_obj.result,
             })
         return data
@@ -198,11 +197,15 @@ class DinamicAnswer(BaseModel):
 class Parameters(BaseModel):
     question = models.ForeignKey(Question,related_name='dinamic_question_parameters', on_delete=models.CASCADE)
     parameter = models.CharField(max_length=100)
-    min_val = models.IntegerFieldField(default=0)
+    min_val = models.IntegerField(default=0)
     max_val = models.IntegerField(default=0)
 
-    value = random.randint(min_val, max_val)
-
+    def generate_random_value(self):
+        min_value = self.min_val
+        max_value = self.max_val
+        value = random.randint(min_value, max_value)
+        self.value = value
+    
     def __str__(self) -> str:
         return self.parameter
 
