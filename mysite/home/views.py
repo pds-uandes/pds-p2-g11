@@ -88,9 +88,19 @@ class StudentListView(View):
 
 @login_required(login_url='/login/')
 def home(request):
+<<<<<<< HEAD
     tasks = Task.objects.all()
     students = CustomUser.objects.filter(is_student=True)
+=======
+    #borrar la task actual
+    if 'task_id' in request.session:
+        del request.session['task_id']
+
+    context = {'tasks': Task.objects.all()}
+
+>>>>>>> origin/finish_mcq_task
     if request.GET.get('task'):
+        # delete the task_id from the session
         return redirect(f"quiz/?task={request.GET.get('task')}")
     
     context = {'tasks': tasks, 'students': students}
@@ -145,20 +155,15 @@ def get_quiz(request):
         print(e)
     return HttpResponse("Something went wrong!")
 
+# ================== DO TASK ==================
 def do_task(request):
-    # Check if there is an active task in the session
-    json_user = {
-    'difficulty': 1,
-    'level': 0,
-    'type_task': 0,
-    }
+    json_user = request.user.json_user
 
     if 'task_id' not in request.session:
         # If not, create a new task
         task = Task()
-
-        questions = task.add_questions(json_user['level'], json_user['type_task'], json_user['difficulty'])
-
+        task.questions.clear()
+        task.wrongs.clear()
         task.save()
         task_id = str(task.uid)
         request.session['task_id'] = task_id
@@ -168,15 +173,54 @@ def do_task(request):
         task_id = uuid.UUID(task_id)  # Convert the stored string back to a UUID
         task = Task.objects.get(pk=task_id)
         task.counter += 1
+
+        if request.method == "POST":
+            question_text = request.POST.get('question')
+            question = Question.objects.get(question_text=question_text)
+            selected_answer = request.POST.get('selected_answer')
+
+            # Get the correct answer from the question's answers
+            correct_answer = None
+
+            for answer in question.get_answers():
+                if answer['is_correct']:
+                    correct_answer = answer['answer']
+                    break
+
+            print(f"Correct answer: {correct_answer}")
+            print(f"Selected answer: {selected_answer}")
+
+            # Compare the selected answer with the correct answer
+            if selected_answer == correct_answer:
+                print("The selected answer is CORRECT.")
+                task.score += 1
+
+            else:
+                if question not in task.wrongs:
+                    task.wrongs.append(question)
+                    task.wrongs_permanent.append(question)
+                print("The selected answer is INCORRECT.")
+
+        request.session['wrongs'] = len(task.wrongs)
         task.save()
 
-    print(questions)
     if task.counter >= 5:
-        return render(request, 'results.html', {'questions': questions})
+        return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': True})
 
-    return render(request, 'new_quiz.html', {'questions': questions[task.counter]})
+
+    # get the questions
+    question = task.add_question(json_user['level'], json_user['type_task'], json_user['difficulty'])
+    while question in task.questions:
+        question = task.add_question(json_user['level'], json_user['type_task'], json_user['difficulty'])
+    task.questions.append(question)
+    task.save()
+
+    return render(request, 'new_quiz.html', {'question': task.questions[-1], 'counter': task.counter + 1, 'redo': True})
+
 
 # Create a view for the results page
+
+
 def results(request):
     # Retrieve the task and its score here to display on the results page
     task_id = request.session.get('task_id')
@@ -187,3 +231,46 @@ def results(request):
         score = None
 
     return render(request, 'results.html', {'score': score})
+
+# =================== REDO TASK VIEW =====================
+def redo_task(request):
+    task_id = request.session.get('task_id')
+    if task_id:
+        task = Task.objects.get(pk=task_id)
+
+        print(task.wrongs)
+        print("Task found!")
+    else:
+        print("No task found!")
+
+    task.wrongs_counter += 1
+    if task.wrongs_counter > 0:
+        question_text = request.POST.get('question')
+        question = Question.objects.get(question_text=question_text)
+        selected_answer = request.POST.get('selected_answer')
+
+        # Get the correct answer from the question's answers
+        correct_answer = None
+
+        for answer in question.get_answers():
+            if answer['is_correct']:
+                correct_answer = answer['answer']
+                break
+
+        print(f"Correct answer: {correct_answer}")
+        print(f"Selected answer: {selected_answer}")
+
+        # Compare the selected answer with the correct answer
+        if selected_answer == correct_answer:
+            print("The selected answer is CORRECT.")
+            task.score += 1
+            task.wrongs.remove(question)
+    task.save()
+    print('================== task wrong counter =======')
+
+    if task.wrongs_counter >= len(task.wrongs_permanent):
+        return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
+
+    print(task.wrongs_permanent[task.wrongs_counter])
+    return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False})
+    #si no quedan, lo tira al results final y de ahi a home

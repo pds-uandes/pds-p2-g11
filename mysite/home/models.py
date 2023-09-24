@@ -26,6 +26,13 @@ class CustomUser(AbstractUser):
     last_logout_time = models.DateTimeField(null=True, blank=True)
     total_time_spent = models.DurationField(default=timedelta())
     
+    json_user = {
+    'difficulty': 1,
+    'level': 0,
+    'type_task': 0,
+    }
+
+
 class Task(BaseModel):
     tries = {
         'first_try_answered': False,
@@ -33,7 +40,11 @@ class Task(BaseModel):
         'second_try_answered': False,
         'user_answered': False,
     }
-
+    wrongs = []
+    wrongs_permanent = []
+    questions = []
+    counter = models.IntegerField(default=0)
+    wrongs_counter = models.IntegerField(default=-1)
     score = models.IntegerField(default=0)
 
     def __str__(self) -> str:
@@ -47,19 +58,16 @@ class Task(BaseModel):
         self.trys[parameter] = True
         self.save()
 
-    def add_questions(self, level, theme, type, difficulty):
+    def add_question(self, level, task_type, difficulty):
+        if level == 0:
+            theme = 1
+
         question_query = Q(difficulty=difficulty) & Q(theme=theme)
         # type 0: multiple choice questions
         # type 1: numeric question
-        if type == 0:
-            questions = Question.objects.filter(question_query).order_by('?')[:5]
-
-        # Assign the questions to the task
-            for question in questions:
-                question.task = self
-                question.save()
-
-            return questions
+        if task_type == 0:
+            question = Question.objects.filter(question_query).order_by('?')[0]
+            return question
 
 class Question(BaseModel):
     DIFFICULTY_CHOICES = [
@@ -102,3 +110,6 @@ class Answer(BaseModel):
 
     def __str__(self) -> str:
         return self.answer
+
+# class NumericQuestion(BaseModel):
+#     question_text = models.CharField(max_length=1000)
