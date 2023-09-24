@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 # Create your models here.
+import sympy
 import random
 from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
@@ -69,6 +70,7 @@ class Task(BaseModel):
             question = Question.objects.filter(question_query).order_by('?')[0]
             return question
 
+# ===================== MCQ =====================
 class Question(BaseModel):
     DIFFICULTY_CHOICES = [
         (1, 'Easy'),
@@ -111,6 +113,7 @@ class Answer(BaseModel):
     def __str__(self) -> str:
         return self.answer
 
+# ===================== NUMERIC =====================
 class DinamicQuestion(BaseModel):
     DIFFICULTY_CHOICES = [
         (1, 'Easy'),
@@ -124,22 +127,83 @@ class DinamicQuestion(BaseModel):
         (4, 'Ecuacion de la Onda'),
         (5, 'Energias e info. transferida')]
 
-    task = models.ForeignKey(Task, related_name='task_questions', on_delete=models.CASCADE, null=True, blank=True)
-    question_text = models.CharField(max_length=100)
+    task = models.ForeignKey(Task, related_name='dinamic_task_questions', on_delete=models.CASCADE, null=True, blank=True)
+
+    question_text = models.CharField(max_length=1000)
     hint = models.CharField(max_length=100, null=True, blank=True)
     difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
     theme = models.IntegerField(choices=THEME_CHOICES, default=1)
 
+    # Encuentra la distancia entre dos puntos si recorre a una velocidad de [VELOCIDAD] m/s durante [TIEMPO] segundos [DISTANCIA] [CACHE]
+
     def __str__(self) -> str:
         return self.question_text
 
-    def get_answers(self):
+    def replace_parameters(self):
+        parameters_objs = list(Parameters.objects.filter(question = self))
+        self.parameters = parameters_objs
+        for parameter in parameters_objs:
+            self.question_text = self.question_text.replace(parameter.parameter, str(parameter.value))
+
+    def fill_answers(self):
         answer_objs = list(Answer.objects.filter(question = self))
-        random.shuffle(answer_objs)
+        for answer in answer_objs:
+            for parameter in self.parameters:
+                answer.dic[parameter.parameter] = parameter.value
+            answer.equation_value()
+            answer.save()
+
+    def get_answers(self):
+        #Ir al string de la pregunta y buscar donde reemplazar con la funcion
+        #Entregar el string finalizado
+
+        answer_objs = list(Answer.objects.filter(question = self))
         data = []
         for answer_obj in answer_objs:
+            answer_obj.equation_value()
+            print(answer_obj.parameters)
             data.append({
                 "answer": answer_obj.answer,
-                "is_correct": answer_obj.is_correct
+                'metrics': answer_obj.metrics,
+                'parameters': answer_obj.parameters,
+                'result': answer_obj.result,
             })
         return data
+
+class DinamicAnswer(BaseModel):
+    question = models.ForeignKey(Question,related_name='dinamic_question_answer', on_delete=models.CASCADE)
+
+    dic = {"[VELOCIDAD]": 0,
+            "[TIEMPO]": 0,
+            "[DISTANCIA]": 0,
+            '[FRECUENCIA]': 0,
+            '[LONGITUD]': 0,
+            '[PERIODO]': 0,
+            '[AMPLITUD]': 0}
+
+    metrics = models.CharField(max_length=100)
+    equation = models.CharField(max_length=1000, blank=True)
+
+    def __str__(self) -> str:
+        return self.answer
+
+    def equation_value(self):
+        # Parse the equation
+        expr = sympy.sympify(self.equation)
+
+        result = expr.subs(self.dic)
+
+        self.result = [round(result.evalf(), 3) - round(result.evalf(), 3)*0.05, round(result.evalf(), 3) + round(result.evalf(), 3)*0.05]
+
+class Parameters(BaseModel):
+    question = models.ForeignKey(Question,related_name='dinamic_question_parameters', on_delete=models.CASCADE)
+    parameter = models.CharField(max_length=100)
+    min_val = models.IntegerFieldField(default=0)
+    max_val = models.IntegerField(default=0)
+
+    value = random.randint(min_val, max_val)
+
+    def __str__(self) -> str:
+        return self.parameter
+
+
