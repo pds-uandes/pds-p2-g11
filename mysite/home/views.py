@@ -87,6 +87,7 @@ class StudentListView(View):
 
 
 @login_required(login_url='/login/')
+
 def home(request):
     if 'task_id' in request.session:
         del request.session['task_id']
@@ -97,7 +98,7 @@ def home(request):
         # delete the task_id from the session
         return redirect(f"quiz/?task={request.GET.get('task')}")
 
-    context = {'tasks': tasks, 'students': students}
+    context = {'tasks': tasks, 'students': students, 'type_task': request.user.json_user['type_task']}
     return render(request, 'home.html', context)
 
 def student_profile(request, student_id):
@@ -197,6 +198,8 @@ def do_task(request):
         task.save()
 
     if task.counter >= 5:
+        if len(task.wrongs) == 0:
+            request.user.json_user['type_task'] = 1
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': True})
 
 
@@ -265,7 +268,31 @@ def redo_task(request):
     task.save()
 
     if task.wrongs_counter >= len(task.wrongs_permanent):
+        request.user.json_user['type_task'] = 1
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
 
     return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False})
 
+# ===================== DINAMIC QUESTIONS =====================
+def do_dinamic_task(request):
+    if 'task_id' not in request.session:
+        # If not, create a new task
+        task = Task()
+        task.questions.clear()
+        task.wrongs.clear()
+        task.save()
+        task_id = str(task.uid)
+        request.session['task_id'] = task_id
+        question = task.add_question(0, 1, 1)
+        question.replace_parameters()
+        question.save()
+        task.questions.append(question)
+        task.save()
+    else:
+        # If there is an active task, fetch the task and question number
+        task_id = request.session['task_id']
+        task_id = uuid.UUID(task_id)  # Convert the stored string back to a UUID
+        task = Task.objects.get(pk=task_id)
+
+
+    return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'counter': task.counter + 1})

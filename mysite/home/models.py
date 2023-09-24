@@ -66,7 +66,11 @@ class Task(BaseModel):
         # type 0: multiple choice questions
         # type 1: numeric question
         if task_type == 0:
-            question = Question.objects.filter(question_query).order_by('?')[0]
+            question = Question.objects.filter(question_query).order_by('?').first()
+            return question
+
+        if task_type == 1:
+            question = DinamicQuestion.objects.filter(question_query).order_by('?').first()
             return question
 
 # ===================== MCQ =====================
@@ -138,11 +142,19 @@ class DinamicQuestion(BaseModel):
     def __str__(self) -> str:
         return self.question_text
 
-    def replace_parameters(self):
-        parameters_objs = list(Parameters.objects.filter(question = self))
+    def generate_random_parameters(self):
+        parameters_objs = list(Parameters.objects.filter(question=self))
         self.parameters = parameters_objs
         for parameter in parameters_objs:
-            self.question_text = self.question_text.replace(parameter.parameter, str(parameter.value))
+            parameter.generate_random_value()
+            parameter.save()
+
+    def replace_parameters(self):
+        self.generate_random_parameters()
+        replaced_text = self.question_text
+        for parameter in self.parameters:
+            replaced_text = replaced_text.replace(parameter.parameter, str(parameter.value))
+        self.replaced_text = replaced_text
 
     def fill_answers(self):
         answer_objs = list(Answer.objects.filter(question = self))
@@ -169,7 +181,7 @@ class DinamicQuestion(BaseModel):
         return data
 
 class DinamicAnswer(BaseModel):
-    question = models.ForeignKey(Question,related_name='dinamic_question_answer', on_delete=models.CASCADE)
+    question = models.ForeignKey(DinamicQuestion,related_name='dinamic_question_answer', on_delete=models.CASCADE)
 
     dic = {"[VELOCIDAD]": 0,
             "[TIEMPO]": 0,
@@ -183,7 +195,7 @@ class DinamicAnswer(BaseModel):
     equation = models.CharField(max_length=1000, blank=True)
 
     def __str__(self) -> str:
-        return self.answer
+        return self.equation
 
     def equation_value(self):
         # Parse the equation
@@ -199,10 +211,11 @@ class DinamicAnswer(BaseModel):
 
 
 class Parameters(BaseModel):
-    question = models.ForeignKey(Question,related_name='dinamic_question_parameters', on_delete=models.CASCADE)
+    question = models.ForeignKey(DinamicQuestion,related_name='dinamic_question_parameters', on_delete=models.CASCADE)
     parameter = models.CharField(max_length=100)
     min_val = models.IntegerField(default=0)
     max_val = models.IntegerField(default=0)
+    value = None
 
     def generate_random_value(self):
         min_value = self.min_val

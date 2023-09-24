@@ -1,0 +1,6 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+{% csrf_token %}
+    {{question.replaced_text}}
+{% endblock %}

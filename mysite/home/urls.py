@@ -19,4 +19,4 @@ urlpatterns = [
     path('do_task/', views.do_task, name='do_task'),
     path('results/', views.results, name='results'),
     path('redo_task/', views.redo_task, name='redo_task'),
-]
+    path('dinamic_task/', views.do_dinamic_task, name='do_dinamic_task')]
