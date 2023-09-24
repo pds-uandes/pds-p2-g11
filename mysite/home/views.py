@@ -88,21 +88,15 @@ class StudentListView(View):
 
 @login_required(login_url='/login/')
 def home(request):
-<<<<<<< HEAD
-    tasks = Task.objects.all()
-    students = CustomUser.objects.filter(is_student=True)
-=======
-    #borrar la task actual
     if 'task_id' in request.session:
         del request.session['task_id']
 
-    context = {'tasks': Task.objects.all()}
-
->>>>>>> origin/finish_mcq_task
+    tasks = Task.objects.all()
+    students = CustomUser.objects.filter(is_student=True)
     if request.GET.get('task'):
         # delete the task_id from the session
         return redirect(f"quiz/?task={request.GET.get('task')}")
-    
+
     context = {'tasks': tasks, 'students': students}
     return render(request, 'home.html', context)
 
