@@ -17,6 +17,25 @@ from django.utils import timezone
 from django.contrib.auth.views import LogoutView
 from django.utils import timezone
 from .forms import QuestionForm, QuestionFormSet, AnswerFormSet
+from django.contrib import messages
+
+def teacher_required(view_func):
+    @login_required
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_teacher:
+            messages.error(request, "You are not allowed to view this page.")
+            return redirect('home')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+def student_required(view_func):
+    @login_required
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_student:
+            messages.error(request, "You are not allowed to view this page.")
+            return redirect('home')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
 
 class CustomLoginView(LoginView):
     def form_valid(self, form):
@@ -79,9 +98,8 @@ class UserRegisterView(CreateView):
 
 @method_decorator(login_required, name='dispatch')
 class StudentListView(View):
+    @student_required
     def get(self, request, *args, **kwargs):
-        if not request.user.is_teacher:
-            return HttpResponseForbidden("You are not allowed to view this page.")
         students = CustomUser.objects.filter(is_student=True)
         return render(request, 'students.html', {'students': students})
 
@@ -101,6 +119,7 @@ def home(request):
     context = {'tasks': tasks, 'students': students}
     return render(request, 'home.html', context)
 
+@teacher_required
 def student_profile(request, student_id):
     student = get_object_or_404(CustomUser, pk=student_id)
     if student.last_login_time and student.last_logout_time:
@@ -109,6 +128,7 @@ def student_profile(request, student_id):
         usage_time = "Not available"
     return render(request, 'student_profile.html', {'student': student, 'usage_time': usage_time})
 
+@student_required
 def quiz(request):
     task_uid = request.GET.get('task')
     if task_uid:
@@ -122,6 +142,7 @@ def quiz(request):
     # Handle the case when the task doesn't exist or task_uid is not provided.
     return HttpResponse("Task not found or invalid request!")
 
+@student_required
 def get_quiz(request):
     try:
         task_uid = request.GET.get('task')
@@ -151,6 +172,7 @@ def get_quiz(request):
     return HttpResponse("Something went wrong!")
 
 # ================== DO TASK ==================
+@student_required
 def do_task(request):
     json_user = request.user.json_user
 
@@ -215,7 +237,7 @@ def do_task(request):
 
 # Create a view for the results page
 
-
+@student_required
 def results(request):
     # Retrieve the task and its score here to display on the results page
     task_id = request.session.get('task_id')
@@ -228,6 +250,7 @@ def results(request):
     return render(request, 'results.html', {'score': score})
 
 # =================== REDO TASK VIEW =====================
+@student_required
 def redo_task(request):
     task_id = request.session.get('task_id')
     if task_id:
@@ -267,6 +290,7 @@ def redo_task(request):
 
     return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False})
 
+@teacher_required
 def question_view(request):
     if not request.user.is_teacher:
         return redirect('home')
@@ -286,11 +310,8 @@ def question_view(request):
     questions = Question.objects.all()
     return render(request, 'questions.html', {'form': form, 'formset': formset, 'questions': questions})
 
-
+@teacher_required
 def add_question_view(request):
-    if not request.user.is_teacher:
-        return redirect('home')
-
     if request.method == 'POST':
         form = QuestionForm(request.POST)
         if form.is_valid():
@@ -305,7 +326,7 @@ def add_question_view(request):
 
     return render(request, 'add_question.html', {'form': form, 'formset': formset})
 
-
+@teacher_required
 def edit_question_view(request, pk):
     question = get_object_or_404(Question, pk=pk)
 
@@ -326,6 +347,7 @@ def edit_question_view(request, pk):
 
     return render(request, 'edit_question.html', {'form': form, 'formset': formset})
 
+@teacher_required
 def delete_question_view(request, pk):
     question = get_object_or_404(Question, pk=pk)
 
