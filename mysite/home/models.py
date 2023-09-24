@@ -25,7 +25,7 @@ class CustomUser(AbstractUser):
     last_login_time = models.DateTimeField(null=True, blank=True)
     last_logout_time = models.DateTimeField(null=True, blank=True)
     total_time_spent = models.DurationField(default=timedelta())
-    
+
     json_user = {
     'difficulty': 1,
     'level': 0,
@@ -111,5 +111,35 @@ class Answer(BaseModel):
     def __str__(self) -> str:
         return self.answer
 
-# class NumericQuestion(BaseModel):
-#     question_text = models.CharField(max_length=1000)
+class DinamicQuestion(BaseModel):
+    DIFFICULTY_CHOICES = [
+        (1, 'Easy'),
+        (2, 'Medium'),
+        (3, 'Hard')]
+
+    THEME_CHOICES = [
+        (1, 'Caracteristicas de la onda'),
+        (2, 'Ondas Sonoras'),
+        (3, 'Ondas Armonicas'),
+        (4, 'Ecuacion de la Onda'),
+        (5, 'Energias e info. transferida')]
+
+    task = models.ForeignKey(Task, related_name='task_questions', on_delete=models.CASCADE, null=True, blank=True)
+    question_text = models.CharField(max_length=100)
+    hint = models.CharField(max_length=100, null=True, blank=True)
+    difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
+    theme = models.IntegerField(choices=THEME_CHOICES, default=1)
+
+    def __str__(self) -> str:
+        return self.question_text
+
+    def get_answers(self):
+        answer_objs = list(Answer.objects.filter(question = self))
+        random.shuffle(answer_objs)
+        data = []
+        for answer_obj in answer_objs:
+            data.append({
+                "answer": answer_obj.answer,
+                "is_correct": answer_obj.is_correct
+            })
+        return data

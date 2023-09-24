@@ -260,11 +260,9 @@ def redo_task(request):
             task.score += 1
             task.wrongs.remove(question)
     task.save()
-    print('================== task wrong counter =======')
 
     if task.wrongs_counter >= len(task.wrongs_permanent):
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
 
-    print(task.wrongs_permanent[task.wrongs_counter])
     return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False})
-    #si no quedan, lo tira al results final y de ahi a home
+
