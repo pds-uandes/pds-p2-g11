@@ -29,7 +29,7 @@ class CustomUser(AbstractUser):
     json_user = {
     'difficulty': 1,
     'level': 0,
-    'type_task': 0,
+    'type_task': 1,
     }
 
 
@@ -136,11 +136,18 @@ class DinamicQuestion(BaseModel):
     hint = models.CharField(max_length=100, null=True, blank=True)
     difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
     theme = models.IntegerField(choices=THEME_CHOICES, default=1)
-
-    # Encuentra la distancia entre dos puntos si recorre a una velocidad de [VELOCIDAD] m/s durante [TIEMPO] segundos [DISTANCIA] [CACHE]
-
+    wrong_answers = []
+  
     def __str__(self) -> str:
         return self.question_text
+
+    def fill_answers(self):
+        answer_objs = list(DinamicAnswer.objects.filter(question = self))
+        for answer in answer_objs:
+            for parameter in self.parameters:
+                answer.dic[parameter.parameter] = parameter.value
+            answer.equation_value()
+            answer.save()
 
     def generate_random_parameters(self):
         parameters_objs = list(Parameters.objects.filter(question=self))
@@ -151,23 +158,16 @@ class DinamicQuestion(BaseModel):
 
     def replace_parameters(self):
         self.generate_random_parameters()
+        self.fill_answers()
         replaced_text = self.question_text
         for parameter in self.parameters:
             replaced_text = replaced_text.replace(parameter.parameter, str(parameter.value))
         self.replaced_text = replaced_text
 
-    def fill_answers(self):
-        answer_objs = list(Answer.objects.filter(question = self))
-        for answer in answer_objs:
-            for parameter in self.parameters:
-                answer.dic[parameter.parameter] = parameter.value
-            answer.equation_value()
-            answer.save()
 
     def get_answers(self):
         #Ir al string de la pregunta y buscar donde reemplazar con la funcion
         #Entregar el string finalizado
-
         answer_objs = list(Answer.objects.filter(question = self))
         data = []
         for answer_obj in answer_objs:
@@ -198,18 +198,22 @@ class DinamicAnswer(BaseModel):
         return self.equation
 
     def equation_value(self):
-        # Parse the equation
+        self.aux_equation = self.equation
         for placeholder, value in self.dic.items():
             self.equation = self.equation.replace(placeholder, str(value))
+        result = eval(self.equation)
+        self.result = [round(result) - round(result, 3)*0.05, round(result, 3) + round(result, 3)*0.05]
+        self.equation = self.aux_equation
 
-        try:
-            result = eval(self.equation)
-            self.result = [round(result.evalf(), 3) - round(result.evalf(), 3)*0.05, round(result.evalf(), 3) + round(result.evalf(), 3)*0.05]
-        except Exception as e:
-            return f"Error: {str(e)}"
-
-
-
+    def get_result(self):
+        self.aux_equation = self.equation
+        for placeholder, value in self.dic.items():
+            self.equation = self.equation.replace(placeholder, str(value))
+        result = eval(self.equation)
+        result = [round(result,3) - round(result, 3)*0.05, round(result, 3) + round(result, 3)*0.05]
+        self.equation = self.aux_equation
+        return result
+        
 class Parameters(BaseModel):
     question = models.ForeignKey(DinamicQuestion,related_name='dinamic_question_parameters', on_delete=models.CASCADE)
     parameter = models.CharField(max_length=100)

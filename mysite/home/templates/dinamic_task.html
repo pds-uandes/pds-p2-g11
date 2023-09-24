@@ -1,6 +1,46 @@
-{% extends "base_generic.html" %}
+{% load static %}
 
-{% block content %}
-{% csrf_token %}
-    {{question.replaced_text}}
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Dinamic Task</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card mt-5">
+                    <div class="card-header">
+                        <h3 class="card-title">Dinamic Question</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="dinamic-form" method="post" action="{% url 'do_dinamic_task' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="questionText">Question</label>
+                                <p id="questionText">{{ question.replaced_text }}</p>
+                            </div>
+                            {% for i in number_of_answers %}
+                                <div class="form-group">
+                                    <label for="userAnswer{{ forloop.counter }}">{{ forloop.counter }}</label>
+                                    <input type="number" class="form-control" id="userAnswer{{ forloop.counter }}" name="userAnswer{{ forloop.counter }}" placeholder="Enter answer" step="any">{{i.metrics}}
+                                </div>
+                            {% endfor %}
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

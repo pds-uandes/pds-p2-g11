@@ -293,6 +293,27 @@ def do_dinamic_task(request):
         task_id = request.session['task_id']
         task_id = uuid.UUID(task_id)  # Convert the stored string back to a UUID
         task = Task.objects.get(pk=task_id)
+        question = task.questions[-1]
+        if request.method == "POST":
+            answers = DinamicAnswer.objects.filter(question=question)
+            for i,a in enumerate(answers):
+                res = a.get_result()
+                print(f"Result: {res}")
+                user_answer = float(request.POST.get(f'userAnswer{i+1}'))
+                print(f"User answer {a}: {user_answer}")
+                if user_answer >= res[0] and user_answer <= res[1]:
+                    print(f"Range: {res[0]} - {res[1]}")
+                    task.score += 1
+                        
+                else:
+                    question.wrong_answers.append(a)
+                    task.wrongs.append(question)
+                    print(question.wrong_answers)
+        task.save()
+        return render(request, 'dinamic_results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
 
 
-    return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'counter': task.counter + 1})
+    number_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
+   
+
+    return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'counter': task.counter + 1, "number_of_answers": number_of_answers})
