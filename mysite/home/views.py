@@ -16,6 +16,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.utils import timezone
 from django.contrib.auth.views import LogoutView
 from django.utils import timezone
+from .forms import QuestionForm, QuestionFormSet, AnswerFormSet
 
 class CustomLoginView(LoginView):
     def form_valid(self, form):
@@ -88,21 +89,15 @@ class StudentListView(View):
 
 @login_required(login_url='/login/')
 def home(request):
-<<<<<<< HEAD
-    tasks = Task.objects.all()
-    students = CustomUser.objects.filter(is_student=True)
-=======
-    #borrar la task actual
     if 'task_id' in request.session:
         del request.session['task_id']
 
-    context = {'tasks': Task.objects.all()}
-
->>>>>>> origin/finish_mcq_task
+    tasks = Task.objects.all()
+    students = CustomUser.objects.filter(is_student=True)
     if request.GET.get('task'):
         # delete the task_id from the session
         return redirect(f"quiz/?task={request.GET.get('task')}")
-    
+
     context = {'tasks': tasks, 'students': students}
     return render(request, 'home.html', context)
 
@@ -266,11 +261,79 @@ def redo_task(request):
             task.score += 1
             task.wrongs.remove(question)
     task.save()
-    print('================== task wrong counter =======')
 
     if task.wrongs_counter >= len(task.wrongs_permanent):
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
 
-    print(task.wrongs_permanent[task.wrongs_counter])
     return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False})
-    #si no quedan, lo tira al results final y de ahi a home
+
+def question_view(request):
+    if not request.user.is_teacher:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = QuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save()
+            formset = QuestionFormSet(request.POST, instance=question)
+            if formset.is_valid():
+                formset.save()
+                return redirect('questions')
+    else:
+        form = QuestionForm()
+        formset = QuestionFormSet()
+
+    questions = Question.objects.all()
+    return render(request, 'questions.html', {'form': form, 'formset': formset, 'questions': questions})
+
+
+def add_question_view(request):
+    if not request.user.is_teacher:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = QuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save()
+            formset = AnswerFormSet(request.POST, instance=question)
+            if formset.is_valid():
+                formset.save()
+                return redirect('questions')
+    else:
+        form = QuestionForm()
+        formset = AnswerFormSet()
+
+    return render(request, 'add_question.html', {'form': form, 'formset': formset})
+
+
+def edit_question_view(request, pk):
+    question = get_object_or_404(Question, pk=pk)
+
+    if not request.user.is_teacher:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = QuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            question = form.save()
+            formset = AnswerFormSet(request.POST, instance=question)
+            if formset.is_valid():
+                formset.save()
+                return redirect('questions')
+    else:
+        form = QuestionForm(instance=question)
+        formset = AnswerFormSet(instance=question)
+
+    return render(request, 'edit_question.html', {'form': form, 'formset': formset})
+
+def delete_question_view(request, pk):
+    question = get_object_or_404(Question, pk=pk)
+
+    if not request.user.is_teacher:
+        return redirect('home')
+
+    if request.method == 'POST':
+        question.delete()
+        return redirect('questions')
+
+    return render(request, 'confirm_delete.html', {'question': question})

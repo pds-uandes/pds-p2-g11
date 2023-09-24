@@ -1,0 +1,18 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        {{ formset.management_form }}
+        {% for answer_form in formset %}
+            <div class="answer-form form-group">
+                {{ answer_form.as_p }}
+                {% if answer_form.instance.pk %}  <!-- Only display the delete checkbox for existing answers -->
+                    Delete: {{ answer_form.DELETE }}
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+{% endblock %}

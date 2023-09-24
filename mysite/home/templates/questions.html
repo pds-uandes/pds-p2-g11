@@ -1,0 +1,37 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <table class="table">
+        <thead>
+          <tr>
+            <th>Question Text</th>
+            <th>Hint</th>
+            <th>Difficulty</th>
+            <th>Theme</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for question in questions %}
+            <tr>
+              <td>{{ question.question_text }}</td>
+              <td>{{ question.hint }}</td>
+              <td>{{ question.get_difficulty_display }}</td>
+              <td>{{ question.get_theme_display }}</td>
+              <td>
+                <a href="{% url 'edit_question' question.pk %}" class="btn btn-primary">Edit</a>
+
+                <a href="{% url 'delete_question' question.pk %}" class="btn btn-danger">Delete</a>
+
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5">No questions available.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <a href="{% url 'add_question' %}" class="btn btn-success">Add Question</a>
+{% endblock %}

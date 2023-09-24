@@ -1,0 +1,10 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <p class="mb-3">Are you sure you want to delete "{{ question.question_text }}"?</p>
+        <button type="submit" class="btn btn-danger">Yes, delete</button>
+        <a href="{% url 'questions' %}" class="btn btn-secondary">No, I've changed my mind</a>
+    </form>
+{% endblock %}
