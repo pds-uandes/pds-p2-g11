@@ -106,7 +106,7 @@ class StudentListView(View):
 
 
 @login_required(login_url='/login/')
-
+# ================================================ HOME ====================================================================
 def home(request):
     print(request.user.user_score)
     if 'task_id' in request.session:
@@ -118,10 +118,16 @@ def home(request):
         # delete the task_id from the session
         return redirect(f"quiz/?task={request.GET.get('task')}")
 
-    context = {'tasks': tasks, 'students': students, 'type_task': request.user.json_user['type_task']}
+    dif = request.user.json_user['difficulty']
+    if dif < 4:
+        task = 0
+    else:
+        task = 1
+    context = {'tasks': tasks, 'students': students, 'type_task': task}
     return render(request, 'home.html', context)
 
 @teacher_required
+# ================================================ STUDENT ====================================================================
 def student_profile(request, student_id):
     student = get_object_or_404(CustomUser, pk=student_id)
     if student.last_login_time and student.last_logout_time:
@@ -131,6 +137,7 @@ def student_profile(request, student_id):
     return render(request, 'student_profile.html', {'student': student, 'usage_time': usage_time})
 
 @student_required
+# ================================================ QUIZ ====================================================================
 def quiz(request):
     task_uid = request.GET.get('task')
     if task_uid:
@@ -145,6 +152,7 @@ def quiz(request):
     return HttpResponse("Task not found or invalid request!")
 
 @student_required
+# ================================================ GET QUIZ ====================================================================
 def get_quiz(request):
     try:
         task_uid = request.GET.get('task')
@@ -173,7 +181,7 @@ def get_quiz(request):
         print(e)
     return HttpResponse("Something went wrong!")
 
-# ================== DO TASK ==================
+# ================================================ DO TASK ====================================================================
 @student_required
 def do_task(request):
     json_user = request.user.json_user
@@ -203,7 +211,8 @@ def do_task(request):
             question_text = request.POST.get('question')
             question = Question.objects.get(question_text=question_text)
             selected_answer = request.POST.get('selected_answer')
-
+            question.user_answer = selected_answer
+            question.save()
             # Get the correct answer from the question's answers
             correct_answer = None
 
@@ -226,9 +235,6 @@ def do_task(request):
 
             else:
                 if question not in task.wrongs:
-                    question.user_answer = selected_answer
-                    print(question.user_answer)
-                    question.save()
                     task.wrongs.append(question)
                     task.wrongs_permanent.append(question)
                     #Sumamos en el score del usuario
@@ -238,16 +244,16 @@ def do_task(request):
                 print("The selected answer is INCORRECT.")
         task.save()
 
-    if task.counter >= 5:
+    if task.counter >= 1:
         if len(task.wrongs) == 0:
-            request.user.json_user['type_task'] = 1
+            request.user.json_user['difficulty'] += 1
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': True})
 
 
     # get the questions
-    question = task.add_question(json_user['theme'], json_user['type_task'], json_user['difficulty'])
-    while question in task.questions:
-        question = task.add_question(json_user['theme'], json_user['type_task'], json_user['difficulty'])
+    question = task.add_question(json_user['theme'], json_user['difficulty'])
+    while question in task.questions: # theme, task_type, difficulty
+        question = task.add_question(json_user['theme'], json_user['difficulty'])
     task.questions.append(question)
     task.save()
 
@@ -257,6 +263,7 @@ def do_task(request):
 # Create a view for the results page
 
 @student_required
+# ================================================ RESULTS ====================================================================
 def results(request):
     # Retrieve the task and its score here to display on the results page
     task_id = request.session.get('task_id')
@@ -268,7 +275,7 @@ def results(request):
 
     return render(request, 'results.html', {'score': score})
 
-# =================== REDO TASK VIEW =====================
+# ================================================ REDO TASK ====================================================================
 @student_required
 def redo_task(request):
     task_id = request.session.get('task_id')
@@ -313,14 +320,16 @@ def redo_task(request):
         print(task.wrongs)
         print(task.wrongs_permanent)
     task.save()
+    if task.score == 3:
+        request.user.json_user['difficulty'] += 1
 
     if task.wrongs_counter >= len(task.wrongs_permanent):
-        request.user.json_user['type_task'] = 1
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
 
     return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False, 'hide_answer': task.wrongs_permanent[task.wrongs_counter].user_answer, 'total_wrongs': len(task.wrongs_permanent)})
 
 @teacher_required
+# ================================================ QUESTION ====================================================================
 def question_view(request):
     if not request.user.is_teacher:
         return redirect('home')
@@ -341,6 +350,7 @@ def question_view(request):
     return render(request, 'questions.html', {'form': form, 'formset': formset, 'questions': questions})
 
 @teacher_required
+# ================================================ ADD QUESTION ====================================================================
 def add_question_view(request):
     if request.method == 'POST':
         form = QuestionForm(request.POST)
@@ -357,6 +367,7 @@ def add_question_view(request):
     return render(request, 'add_question.html', {'form': form, 'formset': formset})
 
 @teacher_required
+# ================================================ EDIT QUESTION ====================================================================
 def edit_question_view(request, pk):
     question = get_object_or_404(Question, pk=pk)
 
@@ -378,6 +389,7 @@ def edit_question_view(request, pk):
     return render(request, 'edit_question.html', {'form': form, 'formset': formset})
 
 @teacher_required
+# ================================================ DELETE QUESTION ====================================================================
 def delete_question_view(request, pk):
     question = get_object_or_404(Question, pk=pk)
 
@@ -389,7 +401,8 @@ def delete_question_view(request, pk):
         return redirect('questions')
 
     return render(request, 'confirm_delete.html', {'question': question})
-# ===================== DINAMIC QUESTIONS =====================
+
+# ================================================ DINAMIC QUESTION ====================================================================
 def do_dinamic_task(request):
     if 'task_id' not in request.session:
         # If not, create a new task
@@ -400,7 +413,9 @@ def do_dinamic_task(request):
         task_id = str(task.uid)
         request.session['task_id'] = task_id
         request.session['redo'] = True
-        question = task.add_question(1, 1, 1)
+
+        json_user = request.user.json_user
+        question = task.add_question(json_user['theme'], json_user['difficulty']) # theme, task_type, difficulty
         question.replace_parameters()
         question.save()
         task.questions.append(question)
@@ -441,9 +456,13 @@ def do_dinamic_task(request):
 
         task.save()
         if task.wrongs:
-            request.user.json_user['type_task'] = 0
             return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': answers})
 
+        if request.user.json_user['difficulty'] < 5:
+            request.user.json_user['difficulty'] += 1
+        else:
+            request.user.json_user['difficulty'] = 1
+            request.user.json_user['theme'] += 1
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
 
 
@@ -452,7 +471,7 @@ def do_dinamic_task(request):
 
     return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'counter': task.counter + 1, "number_of_answers": number_of_answers})
 
-
+# ================================================ REDO DINAMIC ====================================================================
 def redo_dinamic_task(request):
     task_id = request.session.get('task_id')
     if task_id:
@@ -496,8 +515,11 @@ def redo_dinamic_task(request):
                     request.user.save()
                     #---------------------#
 
-
-        request.user.json_user['type_task'] = 0
+        if request.user.json_user['difficulty'] < 5:
+            request.user.json_user['difficulty'] += 1
+        else:
+            request.user.json_user['difficulty'] = 1
+            request.user.json_user['theme'] += 1
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
 
 

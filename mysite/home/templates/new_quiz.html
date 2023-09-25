@@ -7,7 +7,7 @@
         {% csrf_token %}
         <div class="card mt-4">
             <div class="card-header">
-                {{counter}} of 5 questions
+                {{counter}} of 3 questions
             </div>
             <div class="card-header">
                 <p>Dificultad: {{ question.get_difficulty_display }}</p>
@@ -28,7 +28,6 @@
             </ul>
             <div class="card-footer">
                 <button type="submit" id="next-button" class = 'btn btn-secondary btn-sm'>Next</button>
-                <a href="{% url 'home' %}" class="btn btn-danger btn-sm">Home</a>
             </div>
         </div>
     </form>
@@ -66,7 +65,6 @@
             </ul>
             <div class="card-footer">
                 <button type="submit" id="next-button" class = 'btn btn-secondary btn-sm'>Next</button>
-                <a href="{% url 'home' %}" class="btn btn-danger btn-sm">Home</a>
             </div>
         </div>
     </form>

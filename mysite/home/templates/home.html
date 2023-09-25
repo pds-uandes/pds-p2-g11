@@ -77,8 +77,8 @@
     <br>
 
     {% if request.user.is_student %}
-    <div class="container text-center" style="margin:auto; width:170px;">
-      {% if type_task == 0 %}
+    {% if type_task == 0 %}
+      <div class="container text-center" style="margin:auto; width:170px;">
       <form method="post" action="{% url 'do_task' %}">
         {% csrf_token %}
 
@@ -87,7 +87,7 @@
       </div>
       {%else%}
 
-    <div class="container text-center" style="margin:auto;">
+    <div class="container text-center" style="margin:auto; width:170px;">
       <form action="{% url 'do_dinamic_task' %}" method="post">
         {% csrf_token %}
         <button type="submit" class="btn btn-success mt-2">Start Task</button>

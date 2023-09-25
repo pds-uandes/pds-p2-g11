@@ -28,9 +28,7 @@ class CustomUser(AbstractUser):
 
     json_user = {
     'difficulty': 1, # 1: easy, 2: medium, 3: hard, 4:DINAMIC 1 5:DINAMIC 2
-    'theme': 1, # 1: Caracteristicas de la onda, 2: Ondas Sonoras, 3: Ondas Armonicas, 4: Ecuacion de la Onda, 5: Energias e info. transferida
-    'type_task': 0, # 0: multiple choice questions, 1: numeric question
-    }
+    'theme': 1}# 1: Caracteristicas de la onda, 2: Ondas Sonoras, 3: Ondas Armonicas, 4: Ecuacion de la Onda, 5: Energias e info. transferida
 
     user_score = {
     'tasks' : 0,
@@ -87,16 +85,20 @@ class Task(BaseModel):
         self.trys[parameter] = True
         self.save()
 
-    def add_question(self, theme, task_type, difficulty):
+    def add_question(self, theme, difficulty):
 
-        question_query = Q(difficulty=difficulty) & Q(theme=theme)
-        # type 0: multiple choice questions
-        # type 1: numeric question
-        if task_type == 0:
+        if difficulty < 4:
+            question_query = Q(difficulty=difficulty) & Q(theme=theme)
             question = Question.objects.filter(question_query).order_by('?').first()
             return question
 
-        if task_type == 1:
+        # 1: easy, 2: medium, 3: hard, 4:DINAMIC 1 5:DINAMIC 2
+        if difficulty == 4:
+            question_query = Q(difficulty=1) & Q(theme=theme)
+            question = DinamicQuestion.objects.filter(question_query).order_by('?').first()
+            return question
+        if difficulty == 5:
+            question_query = Q(difficulty=2) & Q(theme=theme)
             question = DinamicQuestion.objects.filter(question_query).order_by('?').first()
             return question
 
@@ -116,7 +118,7 @@ class Question(BaseModel):
 
     task = models.ForeignKey(Task, related_name='task_questions', on_delete=models.CASCADE, null=True, blank=True)
     question_text = models.CharField(max_length=1000)
-    hint = models.CharField(max_length=100, null=True, blank=True)
+    hint = models.CharField(max_length=200, null=True, blank=True)
     difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
     theme = models.IntegerField(choices=THEME_CHOICES, default=1)
     user_answer = ''
@@ -155,12 +157,12 @@ class DinamicQuestion(BaseModel):
         (2, 'Ondas Sonoras'),
         (3, 'Ondas Armonicas'),
         (4, 'Ecuacion de la Onda'),
-        (5, 'Energias e info. transferida')]
+        (5, 'Energias e Info. Transferida')]
 
     task = models.ForeignKey(Task, related_name='dinamic_task_questions', on_delete=models.CASCADE, null=True, blank=True)
 
     question_text = models.CharField(max_length=1000)
-    hint = models.CharField(max_length=100, null=True, blank=True)
+    hint = models.CharField(max_length=200, null=True, blank=True)
     difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
     theme = models.IntegerField(choices=THEME_CHOICES, default=1)
     wrong_answers = []
