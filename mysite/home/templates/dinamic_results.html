@@ -1,0 +1,48 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="container" style="margin:auto;">
+    <div class="container text-center" style="margin:auto;">
+    {% if redo and answers %}
+        <form method="post" action="{% url 'redo_dinamic_task' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success mt-3">Redo</button>
+        </form>
+    {% else %}
+    <form method="post" action="{% url 'home' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success mt-3">Home</button>
+      </form>
+    {% endif %}
+    </div>
+</div>
+
+<div class="container mt-4">
+    <h3>Your Score: {{ score }}</h3>
+    <br>
+        {{ question.replaced_text }}
+        <br>
+        {% for a in answers %}
+        <br>
+        {% if a not in question.wrong_answers %}
+        <div>
+            <h5>✅ {{ forloop.counter }}</h5>
+            <b>Respuesta: </b>{{a.user_answer}}
+        </div>
+        <br>
+        {% else %}
+        <div>
+            <h5>❌ {{ forloop.counter }}</h5>
+            <b>Respuesta: </b>{{a.user_answer}}
+            {% if redo %}
+            <p><b>Hint: </b>{{ question.hint }}</p>
+            {% else %}
+            <p><b>Respuesta correcta:</b></p>{{a.result}}
+            {%endif%}
+        </div>
+        <br>
+        {% endif %}
+    {% endfor %}
+</div>
+
+{% endblock %}

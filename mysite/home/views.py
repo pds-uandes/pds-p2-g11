@@ -106,6 +106,7 @@ class StudentListView(View):
 
 
 @login_required(login_url='/login/')
+
 def home(request):
     if 'task_id' in request.session:
         del request.session['task_id']
@@ -116,7 +117,7 @@ def home(request):
         # delete the task_id from the session
         return redirect(f"quiz/?task={request.GET.get('task')}")
 
-    context = {'tasks': tasks, 'students': students}
+    context = {'tasks': tasks, 'students': students, 'type_task': request.user.json_user['type_task']}
     return render(request, 'home.html', context)
 
 @teacher_required
@@ -217,11 +218,11 @@ def do_task(request):
                     task.wrongs.append(question)
                     task.wrongs_permanent.append(question)
                 print("The selected answer is INCORRECT.")
-
-        request.session['wrongs'] = len(task.wrongs)
         task.save()
 
     if task.counter >= 5:
+        if len(task.wrongs) == 0:
+            request.user.json_user['type_task'] = 1
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': True})
 
 
@@ -278,14 +279,20 @@ def redo_task(request):
         print(f"Correct answer: {correct_answer}")
         print(f"Selected answer: {selected_answer}")
 
+        print(task.wrongs)
+
         # Compare the selected answer with the correct answer
         if selected_answer == correct_answer:
             print("The selected answer is CORRECT.")
             task.score += 1
             task.wrongs.remove(question)
+
+        print(task.wrongs)
+        print(task.wrongs_permanent)
     task.save()
 
     if task.wrongs_counter >= len(task.wrongs_permanent):
+        request.user.json_user['type_task'] = 1
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
 
     return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False})
@@ -359,3 +366,93 @@ def delete_question_view(request, pk):
         return redirect('questions')
 
     return render(request, 'confirm_delete.html', {'question': question})
+# ===================== DINAMIC QUESTIONS =====================
+def do_dinamic_task(request):
+    if 'task_id' not in request.session:
+        # If not, create a new task
+        task = Task()
+        task.questions.clear()
+        task.wrongs.clear()
+        task.save()
+        task_id = str(task.uid)
+        request.session['task_id'] = task_id
+        request.session['redo'] = True
+        question = task.add_question(0, 1, 1)
+        question.replace_parameters()
+        question.save()
+        task.questions.append(question)
+        task.save()
+    else:
+        # If there is an active task, fetch the task and question number
+        task_id = request.session['task_id']
+        task_id = uuid.UUID(task_id)  # Convert the stored string back to a UUID
+        task = Task.objects.get(pk=task_id)
+        question = task.questions[-1]
+        if request.method == "POST":
+            answers = DinamicAnswer.objects.filter(question=question)
+            for i,a in enumerate(answers):
+                res = a.get_result()
+                user_answer = float(request.POST.get(f'userAnswer{i+1}'))
+                print(f"User answer {a}: {user_answer}")
+                a.user_answer = user_answer
+                a.save()
+                if user_answer >= res[0] and user_answer <= res[1]:
+                    print(f"Range: {res[0]} - {res[1]}")
+                    task.score += 1
+                else:
+                    question.wrong_answers.append(a)
+                    task.wrongs.append(question)
+                    print("wrong answers: ",question.wrong_answers)
+
+        task.save()
+        if task.wrongs:
+            return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': answers})
+
+        return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
+
+
+    number_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
+
+
+    return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'counter': task.counter + 1, "number_of_answers": number_of_answers})
+
+
+def redo_dinamic_task(request):
+    task_id = request.session.get('task_id')
+    if task_id:
+        task = Task.objects.get(pk=task_id)
+
+        print(task.wrongs)
+        print("Task found!")
+    else:
+        print("No task found!")
+
+    if request.session['redo']:
+
+        wrong_answers = task.questions[-1].wrong_answers
+
+        number_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
+
+        task.dinamic_counter += 1
+        task.save()
+        request.session['redo'] = False
+        return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': wrong_answers, "number_of_answers": number_of_answers})
+
+    else:
+        task_id = request.session['task_id']
+        task_id = uuid.UUID(task_id)  # Convert the stored string back to a UUID
+        task = Task.objects.get(pk=task_id)
+        question = task.questions[-1]
+        if request.method == "POST":
+            print('========= estamos en preguntas redooooo ==========')
+            answers = DinamicAnswer.objects.filter(question=question)
+            for i,a in enumerate(answers):
+                res = a.get_result()
+                user_answer = float(request.POST.get(f'userAnswer{i+1}'))
+                a.user_answer = user_answer
+                a.save()
+                if user_answer >= res[0] and user_answer <= res[1]:
+                    task.score += 1
+                    question.wrong_answers.remove(a)
+
+        return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})

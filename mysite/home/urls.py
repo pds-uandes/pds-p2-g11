@@ -11,16 +11,18 @@ urlpatterns = [
     path('logout/', CustomLogoutView.as_view(next_page='home'), name='logout'),
     path('students/', StudentListView.as_view(), name='student_list'),
     path('students/<int:student_id>/', student_profile, name='student_profile'),
-    path('', home, name='home'),
-    path('api/get-quiz/', get_quiz, name='get-quiz'),
-    path('quiz/', quiz, name='quiz'),
-    path('do_task/', do_task, name='do_task'),
-    path('results/', results, name='results'),
-    path('redo_task/', views.redo_task, name='redo_task'),
     path('questions/', question_view, name='questions'),
     path('questions/add/', add_question_view, name='add_question'),
     path('questions/edit/<uuid:pk>/', edit_question_view, name='edit_question'),
     path('questions/delete/<uuid:pk>/', delete_question_view, name='delete_question'),
     path('questions/add/', add_question_view, name='add_question'),
-    
-]
+    path('', views.home, name='home'),
+    path('api/get-quiz/', views.get_quiz, name='get-quiz'),
+    path('quiz/', views.quiz, name='quiz'),
+    path('do_task/', views.do_task, name='do_task'),
+    path('results/', views.results, name='results'),
+    path('redo_task/', views.redo_task, name='redo_task'),
+    path('dinamic_task/', views.do_dinamic_task, name='do_dinamic_task'),
+    path('dinamic_results/', views.results, name='dinamic_results'),
+    path('redo_dinamic_task/', views.redo_dinamic_task, name='redo_dinamic_task')
+    ]

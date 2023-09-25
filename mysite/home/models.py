@@ -25,11 +25,11 @@ class CustomUser(AbstractUser):
     last_login_time = models.DateTimeField(null=True, blank=True)
     last_logout_time = models.DateTimeField(null=True, blank=True)
     total_time_spent = models.DurationField(default=timedelta())
-    
+
     json_user = {
     'difficulty': 1,
     'level': 0,
-    'type_task': 0,
+    'type_task': 1,
     }
 
 
@@ -46,7 +46,7 @@ class Task(BaseModel):
     counter = models.IntegerField(default=0)
     wrongs_counter = models.IntegerField(default=-1)
     score = models.IntegerField(default=0)
-
+    dinamic_counter = 1
     def __str__(self) -> str:
         return f"Task - {self.uid}"
 
@@ -66,9 +66,14 @@ class Task(BaseModel):
         # type 0: multiple choice questions
         # type 1: numeric question
         if task_type == 0:
-            question = Question.objects.filter(question_query).order_by('?')[0]
+            question = Question.objects.filter(question_query).order_by('?').first()
             return question
 
+        if task_type == 1:
+            question = DinamicQuestion.objects.filter(question_query).order_by('?').first()
+            return question
+
+# ===================== MCQ =====================
 class Question(BaseModel):
     DIFFICULTY_CHOICES = [
         (1, 'Easy'),
@@ -111,5 +116,119 @@ class Answer(BaseModel):
     def __str__(self) -> str:
         return self.answer
 
-# class NumericQuestion(BaseModel):
-#     question_text = models.CharField(max_length=1000)
+# ===================== NUMERIC =====================
+class DinamicQuestion(BaseModel):
+    DIFFICULTY_CHOICES = [
+        (1, 'Easy'),
+        (2, 'Medium'),
+        (3, 'Hard')]
+
+    THEME_CHOICES = [
+        (1, 'Caracteristicas de la onda'),
+        (2, 'Ondas Sonoras'),
+        (3, 'Ondas Armonicas'),
+        (4, 'Ecuacion de la Onda'),
+        (5, 'Energias e info. transferida')]
+
+    task = models.ForeignKey(Task, related_name='dinamic_task_questions', on_delete=models.CASCADE, null=True, blank=True)
+
+    question_text = models.CharField(max_length=1000)
+    hint = models.CharField(max_length=100, null=True, blank=True)
+    difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
+    theme = models.IntegerField(choices=THEME_CHOICES, default=1)
+    wrong_answers = []
+
+    def __str__(self) -> str:
+        return self.question_text
+
+    def fill_answers(self):
+        answer_objs = list(DinamicAnswer.objects.filter(question = self))
+        for answer in answer_objs:
+            for parameter in self.parameters:
+                answer.dic[parameter.parameter] = parameter.value
+            answer.equation_value()
+            answer.save()
+
+    def generate_random_parameters(self):
+        parameters_objs = list(Parameters.objects.filter(question=self))
+        self.parameters = parameters_objs
+        for parameter in parameters_objs:
+            parameter.generate_random_value()
+            parameter.save()
+
+    def replace_parameters(self):
+        self.generate_random_parameters()
+        self.fill_answers()
+        replaced_text = self.question_text
+        for parameter in self.parameters:
+            replaced_text = replaced_text.replace(parameter.parameter, str(parameter.value))
+        self.replaced_text = replaced_text
+
+    def get_answers(self):
+        #Ir al string de la pregunta y buscar donde reemplazar con la funcion
+        #Entregar el string finalizado
+        answer_objs = list(Answer.objects.filter(question = self))
+        data = []
+        for answer_obj in answer_objs:
+            answer_obj.equation_value()
+            print(answer_obj.parameters)
+            data.append({
+                'equation': answer_obj.equation,
+                'metrics': answer_obj.metrics,
+                'result': answer_obj.result,
+            })
+        return data
+
+class DinamicAnswer(BaseModel):
+    question = models.ForeignKey(DinamicQuestion,related_name='dinamic_question_answer', on_delete=models.CASCADE)
+
+    dic = {"[VELOCIDAD]": 0,
+            "[TIEMPO]": 0,
+            "[DISTANCIA]": 0,
+            '[FRECUENCIA]': 0,
+            '[LONGITUD]': 0,
+            '[PERIODO]': 0,
+            '[AMPLITUD]': 0}
+
+    metrics = models.CharField(max_length=100)
+    equation = models.CharField(max_length=1000, blank=True)
+    user_answer = 0
+
+    def __str__(self) -> str:
+        return self.equation
+
+    def equation_value(self):
+        self.aux_equation = self.equation
+        for placeholder, value in self.dic.items():
+            self.equation = self.equation.replace(placeholder, str(value))
+        result = eval(self.equation)
+        self.result = [round(result) - round(result, 3)*0.05, round(result, 3) + round(result, 3)*0.05]
+        self.equation = self.aux_equation
+
+    def get_result(self):
+        self.aux_equation = self.equation
+        for placeholder, value in self.dic.items():
+            self.equation = self.equation.replace(placeholder, str(value))
+        result = eval(self.equation)
+        result = [round(result,3) - round(result*0.05, 3), round(result, 3) + round(result*0.05, 3)]
+        self.equation = self.aux_equation
+        self.result = result
+        return result
+
+class Parameters(BaseModel):
+    question = models.ForeignKey(DinamicQuestion,related_name='dinamic_question_parameters', on_delete=models.CASCADE)
+    parameter = models.CharField(max_length=100)
+    min_val = models.IntegerField(default=0)
+    max_val = models.IntegerField(default=0)
+    value = None
+
+    def generate_random_value(self):
+        min_value = self.min_val
+        max_value = self.max_val
+        value = random.randint(min_value, max_value)
+        self.value = value
+
+    def __str__(self) -> str:
+        return self.parameter
+
+

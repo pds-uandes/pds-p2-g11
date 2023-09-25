@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container" style="margin:auto;">
     <div class="container text-center" style="margin:auto;">
-    {% if redo and wrongs%}
+    {% if redo and wrongs %}
     <form method="post" action="{% url 'redo_task' %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-success mt-3">Redo</button>
@@ -20,13 +20,13 @@
 <div class="container mt-4">
     <h3>Your Score: {{ score }}</h3>
     {% for question in questions %}
-    
+
         {% if question not in wrongs %}
         <div>
             <h5>✅ {{ forloop.counter }}</h5>
             {{ question.question_text }}
         </div>
-        <br>   
+        <br>
         {% else %}
         <div>
             <h5>❌ {{ forloop.counter }}</h5>
