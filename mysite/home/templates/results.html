@@ -1,12 +1,11 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-<div class="container" style="margin:auto;">
-    <div class="container text-center" style="margin:auto;">
+    <div class="container text-center" style="width:100px; background-color: rgb(255 255 255/ 0%);">
     {% if redo and wrongs %}
     <form method="post" action="{% url 'redo_task' %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-success mt-3">Redo</button>
+        <button type="submit" class="btn btn-warning mt-3">Redo</button>
       </form>
     {% else %}
     <form method="post" action="{% url 'home' %}">
@@ -15,27 +14,48 @@
       </form>
     {% endif %}
     </div>
-</div>
 
-<div class="container mt-4">
+<div class="container text-center" style="width:200px;">
     <h3>Your Score: {{ score }}</h3>
+</div>
+<br>
     {% for question in questions %}
+    {% if question not in wrongs %}
+    <div class="d-flex justify-content-center">
 
-        {% if question not in wrongs %}
-        <div>
-            <h5>✅ {{ forloop.counter }}</h5>
-            {{ question.question_text }}
+        <div class="card" style="width:500px;">
+            <div class="card-header">
+                <h5>✅ {{ forloop.counter }}</h5>
+            </div>
+            <div class="card-body">
+                {{ question.question_text }}
+                <!-- <p>
+                    <b>Tu respuesta: </b> {{question.user_answer}}
+                </p> -->
+            </div>
         </div>
+    </div>
         <br>
         {% else %}
-        <div>
-            <h5>❌ {{ forloop.counter }}</h5>
+    <div class="d-flex justify-content-center">
+        <div class="card" style="width:500px;">
+            <div class="card-header">
+                <h5>❌ {{ forloop.counter }}</h5>
+            </div>
+            <div class="card-body">
                 {{ question.question_text }}
+                <!-- <p>
+                    <b>Tu respuesta: </b> {{question.user_answer}}
+                </p> -->
+            </div>
+            <div class="card-body">
             <p><b>Hint: </b>{{ question.hint }}</p>
+            </div>
+        </div>
         </div>
         <br>
         {% endif %}
-    {% endfor %}
-</div>
+        {% endfor %}
+    </div>
 
 {% endblock %}

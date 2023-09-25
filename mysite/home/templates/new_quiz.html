@@ -7,10 +7,14 @@
         {% csrf_token %}
         <div class="card mt-4">
             <div class="card-header">
-                {{counter}} of 5 questions - Dificultad: {{ question.get_difficulty_display }}
+                {{counter}} of 5 questions
+            </div>
+            <div class="card-header">
+                <p>Dificultad: {{ question.get_difficulty_display }}</p>
+                <p>Tema: {{question.get_theme_display}} </p>
             </div>
             <div class="card-header" id="question-text">
-                {{ question.question_text }}
+                <b>{{ question.question_text }}</b>
             </div>
             <ul class="list-group list-group-flush" id="answer-list">
                 {% for answer in question.get_answers %}
@@ -33,7 +37,11 @@
         {% csrf_token %}
         <div class="card mt-4">
             <div class="card-header">
-                {{counter}} of x questions - Difficulty: {{ question.get_difficulty_display }}
+                {{counter}} of {{total_wrongs}} questions
+            </div>
+            <div class="card-header">
+                <p>Dificultad: {{ question.get_difficulty_display }}</p>
+                <p>Tema: {{question.get_theme_display}} </p>
             </div>
             <div class="card-header" id="question-text">
                 {{ question.question_text }}

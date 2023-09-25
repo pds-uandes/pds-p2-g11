@@ -1,13 +1,13 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-<div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card mt-5">
                 <div class="card-header">
                     <h3 class="card-title">Dinamic Question</h3>
                     <h6>Dificultad : {{ question.get_difficulty_display }}</h6>
+                    <h6>Tema : {{ question.get_theme_display }}</h6>
                 </div>
                 {% if redo %}
                 <div class="card-body">
@@ -48,5 +48,4 @@
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

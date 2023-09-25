@@ -108,6 +108,7 @@ class StudentListView(View):
 @login_required(login_url='/login/')
 
 def home(request):
+    print(request.user.user_score)
     if 'task_id' in request.session:
         del request.session['task_id']
 
@@ -182,9 +183,15 @@ def do_task(request):
         task = Task()
         task.questions.clear()
         task.wrongs.clear()
+        task.wrongs_permanent.clear()
         task.save()
         task_id = str(task.uid)
         request.session['task_id'] = task_id
+         #Sumamos en el score del usuario
+        request.user.user_score['tasks'] += 1
+        request.user.save()
+        #---------------------#
+
     else:
         # If there is an active task, fetch the task and question number
         task_id = request.session['task_id']
@@ -212,13 +219,22 @@ def do_task(request):
             if selected_answer == correct_answer:
                 print("The selected answer is CORRECT.")
                 task.score += 1
+                #Sumamos en el score del usuario
+                request.user.user_score[get_theme(question.theme)]['correct'] += 1
+                request.user.save()
+                #---------------------#
 
             else:
                 if question not in task.wrongs:
                     question.user_answer = selected_answer
+                    print(question.user_answer)
                     question.save()
                     task.wrongs.append(question)
                     task.wrongs_permanent.append(question)
+                    #Sumamos en el score del usuario
+                    request.user.user_score[get_theme(question.theme)]['wrongs'] += 1
+                    request.user.save()
+                     #---------------------#
                 print("The selected answer is INCORRECT.")
         task.save()
 
@@ -288,6 +304,11 @@ def redo_task(request):
             print("The selected answer is CORRECT.")
             task.score += 1
             task.wrongs.remove(question)
+            #Sumamos en el score del usuario
+            request.user.user_score[get_theme(question.theme)]['correct'] += 1
+            request.user.user_score[get_theme(question.theme)]['wrongs'] -= 1
+            request.user.save()
+            #---------------------#
 
         print(task.wrongs)
         print(task.wrongs_permanent)
@@ -297,7 +318,7 @@ def redo_task(request):
         request.user.json_user['type_task'] = 1
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
 
-    return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False, 'hide_answer': task.wrongs_permanent[task.wrongs_counter].user_answer})
+    return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False, 'hide_answer': task.wrongs_permanent[task.wrongs_counter].user_answer, 'total_wrongs': len(task.wrongs_permanent)})
 
 @teacher_required
 def question_view(request):
@@ -384,6 +405,10 @@ def do_dinamic_task(request):
         question.save()
         task.questions.append(question)
         task.save()
+        #Sumamos en el score del usuario
+        request.user.user_score['tasks'] += 1
+        request.user.save()
+        #---------------------#
     else:
         # If there is an active task, fetch the task and question number
         task_id = request.session['task_id']
@@ -401,13 +426,22 @@ def do_dinamic_task(request):
                 if user_answer >= res[0] and user_answer <= res[1]:
                     print(f"Range: {res[0]} - {res[1]}")
                     task.score += 1
+                    #Sumamos en el score del usuario
+                    request.user.user_score[get_theme(question.theme)]['correct'] += 1
+                    request.user.save()
+                    #---------------------#
                 else:
                     question.wrong_answers.append(a)
                     task.wrongs.append(question)
+                    #Sumamos en el score del usuario
+                    request.user.user_score[get_theme(question.theme)]['wrongs'] += 1
+                    request.user.save()
+                    #---------------------#
                     print("wrong answers: ",question.wrong_answers)
 
         task.save()
         if task.wrongs:
+            request.user.json_user['type_task'] = 0
             return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': answers})
 
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
@@ -456,5 +490,25 @@ def redo_dinamic_task(request):
                 if user_answer >= res[0] and user_answer <= res[1]:
                     task.score += 1
                     question.wrong_answers.remove(a)
+                    #Sumamos en el score del usuario
+                    request.user.user_score[get_theme(question.theme)]['correct'] += 1
+                    request.user.user_score[get_theme(question.theme)]['wrongs'] -= 1
+                    request.user.save()
+                    #---------------------#
 
+
+        request.user.json_user['type_task'] = 0
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
+
+
+def get_theme(number):
+    if number == 1:
+        return 'level1'
+    elif number == 2:
+        return 'level2'
+    elif number == 3:
+        return 'level3'
+    elif number == 4:
+        return 'level4'
+    elif number == 5:
+        return 'level5'

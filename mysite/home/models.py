@@ -32,6 +32,34 @@ class CustomUser(AbstractUser):
     'type_task': 0, # 0: multiple choice questions, 1: numeric question
     }
 
+    user_score = {
+    'tasks' : 0,
+
+    'level1' : {
+        'wrongs': 0,
+        'correct': 0,
+    },
+    'level2' : {
+        'wrongs': 0,
+        'correct': 0,
+    },
+
+    'level3' : {
+        'wrongs': 0,
+        'correct': 0,
+    },
+
+        'level4' : {
+        'wrongs': 0,
+        'correct': 0,
+    },
+
+        'level5' : {
+        'wrongs': 0,
+        'correct': 0,
+    }
+    }
+
 
 class Task(BaseModel):
     tries = {
