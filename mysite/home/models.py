@@ -137,7 +137,7 @@ class DinamicQuestion(BaseModel):
     difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
     theme = models.IntegerField(choices=THEME_CHOICES, default=1)
     wrong_answers = []
-  
+
     def __str__(self) -> str:
         return self.question_text
 
@@ -210,11 +210,11 @@ class DinamicAnswer(BaseModel):
         for placeholder, value in self.dic.items():
             self.equation = self.equation.replace(placeholder, str(value))
         result = eval(self.equation)
-        result = [round(result,3) - round(result, 3)*0.05, round(result, 3) + round(result, 3)*0.05]
+        result = [round(result,3) - round(result*0.05, 3), round(result, 3) + round(result*0.05, 3)]
         self.equation = self.aux_equation
         self.result = result
         return result
-        
+
 class Parameters(BaseModel):
     question = models.ForeignKey(DinamicQuestion,related_name='dinamic_question_parameters', on_delete=models.CASCADE)
     parameter = models.CharField(max_length=100)

@@ -1,9 +1,6 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-{% if dinamic_counter %}
-        <h1>HOIASJEOIJDASFIOFADSOIJHFDSALIJADFLSJLAFDS</h1>
-{% endif %} 
 <div class="container" style="margin:auto;">
     <div class="container text-center" style="margin:auto;">
     {% if redo and answers %}
@@ -24,6 +21,7 @@
     <h3>Your Score: {{ score }}</h3>
     <br>
         {{ question.replaced_text }}
+        <br>
         {% for a in answers %}
         <br>
         {% if a not in question.wrong_answers %}
@@ -39,7 +37,7 @@
             {% if redo %}
             <p><b>Hint: </b>{{ question.hint }}</p>
             {% else %}
-            <p><b>Respuesta:</b></p>{{a.result}}
+            <p><b>Respuesta correcta:</b></p>{{a.result}}
             {%endif%}
         </div>
         <br>

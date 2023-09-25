@@ -283,6 +283,7 @@ def do_dinamic_task(request):
         task.save()
         task_id = str(task.uid)
         request.session['task_id'] = task_id
+        request.session['redo'] = True
         question = task.add_question(0, 1, 1)
         question.replace_parameters()
         question.save()
@@ -309,22 +310,21 @@ def do_dinamic_task(request):
                     question.wrong_answers.append(a)
                     task.wrongs.append(question)
                     print("wrong answers: ",question.wrong_answers)
-        
+
         task.save()
         if task.wrongs:
             return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': answers})
-        
+
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
 
 
     number_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
-   
+
 
     return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'counter': task.counter + 1, "number_of_answers": number_of_answers})
 
 
 def redo_dinamic_task(request):
-    
     task_id = request.session.get('task_id')
     if task_id:
         task = Task.objects.get(pk=task_id)
@@ -333,14 +333,33 @@ def redo_dinamic_task(request):
         print("Task found!")
     else:
         print("No task found!")
-    if task.dinamic_counter == 1:
+
+    if request.session['redo']:
+
         wrong_answers = task.questions[-1].wrong_answers
 
         number_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
-        
-        task.dinamic_counter += 1   
+
+        task.dinamic_counter += 1
         task.save()
-        return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': wrong_answers, "number_of_answers": number_of_answers})
-    # else:
-    #     print("")
-    #     return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': wrong_answers, "dinamic_counter": True})
+        request.session['redo'] = False
+        return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': wrong_answers, "number_of_answers": number_of_answers})
+
+    else:
+        task_id = request.session['task_id']
+        task_id = uuid.UUID(task_id)  # Convert the stored string back to a UUID
+        task = Task.objects.get(pk=task_id)
+        question = task.questions[-1]
+        if request.method == "POST":
+            print('========= estamos en preguntas redooooo ==========')
+            answers = DinamicAnswer.objects.filter(question=question)
+            for i,a in enumerate(answers):
+                res = a.get_result()
+                user_answer = float(request.POST.get(f'userAnswer{i+1}'))
+                a.user_answer = user_answer
+                a.save()
+                if user_answer >= res[0] and user_answer <= res[1]:
+                    task.score += 1
+                    question.wrong_answers.remove(a)
+
+        return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
