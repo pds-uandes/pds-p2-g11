@@ -17,6 +17,24 @@
                     <div class="card-header">
                         <h3 class="card-title">Dinamic Question</h3>
                     </div>
+                    {% if redo %}
+                    <div class="card-body">
+                        <form id="dinamic-form" method="post" action="{% url 'redo_dinamic_task' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="questionText">Question</label>
+                                <p id="questionText">{{ question.replaced_text }}</p>
+                            </div>
+                            {% for i in number_of_answers %}
+                                <div class="form-group">
+                                    <label for="userAnswer{{ forloop.counter }}">{{ forloop.counter }}</label>
+                                    <input type="number" class="form-control" id="userAnswer{{ forloop.counter }}" name="userAnswer{{ forloop.counter }}" placeholder="Enter answer" step="any">{{i.metrics}}
+                                </div>
+                            {% endfor %}
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                    {% else %}
                     <div class="card-body">
                         <form id="dinamic-form" method="post" action="{% url 'do_dinamic_task' %}">
                             {% csrf_token %}
@@ -33,6 +51,8 @@
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </form>
                     </div>
+                    {% endif %}
+
                 </div>
             </div>
         </div>

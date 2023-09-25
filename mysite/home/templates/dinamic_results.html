@@ -1,13 +1,16 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
+{% if dinamic_counter %}
+        <h1>HOIASJEOIJDASFIOFADSOIJHFDSALIJADFLSJLAFDS</h1>
+{% endif %} 
 <div class="container" style="margin:auto;">
     <div class="container text-center" style="margin:auto;">
-    {% if redo and wrongs %}
-    <form method="post" action="{% url 'redo_task' %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-success mt-3">Redo</button>
-      </form>
+    {% if redo and answers %}
+        <form method="post" action="{% url 'redo_dinamic_task' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success mt-3">Redo</button>
+        </form>
     {% else %}
     <form method="post" action="{% url 'home' %}">
         {% csrf_token %}
@@ -19,19 +22,25 @@
 
 <div class="container mt-4">
     <h3>Your Score: {{ score }}</h3>
-    {% for question in questions %}
-
-        {% if question not in wrongs %}
+    <br>
+        {{ question.replaced_text }}
+        {% for a in answers %}
+        <br>
+        {% if a not in question.wrong_answers %}
         <div>
             <h5>✅ {{ forloop.counter }}</h5>
-            {{ question.question_text }}
+            <b>Respuesta: </b>{{a.user_answer}}
         </div>
         <br>
         {% else %}
         <div>
             <h5>❌ {{ forloop.counter }}</h5>
-                {{ question.question_text }}
+            <b>Respuesta: </b>{{a.user_answer}}
+            {% if redo %}
             <p><b>Hint: </b>{{ question.hint }}</p>
+            {% else %}
+            <p><b>Respuesta:</b></p>{{a.result}}
+            {%endif%}
         </div>
         <br>
         {% endif %}

@@ -298,22 +298,49 @@ def do_dinamic_task(request):
             answers = DinamicAnswer.objects.filter(question=question)
             for i,a in enumerate(answers):
                 res = a.get_result()
-                print(f"Result: {res}")
                 user_answer = float(request.POST.get(f'userAnswer{i+1}'))
                 print(f"User answer {a}: {user_answer}")
+                a.user_answer = user_answer
+                a.save()
                 if user_answer >= res[0] and user_answer <= res[1]:
                     print(f"Range: {res[0]} - {res[1]}")
                     task.score += 1
-                        
                 else:
                     question.wrong_answers.append(a)
                     task.wrongs.append(question)
-                    print(question.wrong_answers)
+                    print("wrong answers: ",question.wrong_answers)
+        
         task.save()
-        return render(request, 'dinamic_results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
+        if task.wrongs:
+            return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': answers})
+        
+        return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
 
 
     number_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
    
 
     return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'counter': task.counter + 1, "number_of_answers": number_of_answers})
+
+
+def redo_dinamic_task(request):
+    
+    task_id = request.session.get('task_id')
+    if task_id:
+        task = Task.objects.get(pk=task_id)
+
+        print(task.wrongs)
+        print("Task found!")
+    else:
+        print("No task found!")
+    if task.dinamic_counter == 1:
+        wrong_answers = task.questions[-1].wrong_answers
+
+        number_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
+        
+        task.dinamic_counter += 1   
+        task.save()
+        return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': wrong_answers, "number_of_answers": number_of_answers})
+    # else:
+    #     print("")
+    #     return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': wrong_answers, "dinamic_counter": True})

@@ -46,7 +46,7 @@ class Task(BaseModel):
     counter = models.IntegerField(default=0)
     wrongs_counter = models.IntegerField(default=-1)
     score = models.IntegerField(default=0)
-
+    dinamic_counter = 1
     def __str__(self) -> str:
         return f"Task - {self.uid}"
 
@@ -164,7 +164,6 @@ class DinamicQuestion(BaseModel):
             replaced_text = replaced_text.replace(parameter.parameter, str(parameter.value))
         self.replaced_text = replaced_text
 
-
     def get_answers(self):
         #Ir al string de la pregunta y buscar donde reemplazar con la funcion
         #Entregar el string finalizado
@@ -193,6 +192,7 @@ class DinamicAnswer(BaseModel):
 
     metrics = models.CharField(max_length=100)
     equation = models.CharField(max_length=1000, blank=True)
+    user_answer = 0
 
     def __str__(self) -> str:
         return self.equation
@@ -212,6 +212,7 @@ class DinamicAnswer(BaseModel):
         result = eval(self.equation)
         result = [round(result,3) - round(result, 3)*0.05, round(result, 3) + round(result, 3)*0.05]
         self.equation = self.aux_equation
+        self.result = result
         return result
         
 class Parameters(BaseModel):
