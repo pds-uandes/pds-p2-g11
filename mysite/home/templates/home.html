@@ -35,7 +35,7 @@
         // Auto-dismiss alerts after 5 seconds
         window.setTimeout(function() {
             $(".alert").fadeTo(500, 0).slideUp(500, function(){
-                $(this).remove(); 
+                $(this).remove();
             });
         }, 5000);
     </script>
@@ -51,6 +51,28 @@
           <p></p>
           {% endif %}
       </div>
+
+    </div>
+    <br>
+    <div class="container text-center" style="width: 500px;">
+    <h3>Temas</h3>
+      <div class="card">
+        <div class="card-header">
+          Características de la Onda
+        </div>
+        <div class="card-header">
+          Ondas Sonoras
+        </div>
+        <div class="card-header">
+          Ondas Armónicas
+        </div>
+        <div class="card-header">
+          Ecuación de la Onda
+        </div>
+        <div class="card-header">
+          Energías e Información Transferida
+        </div>
+      </div>
     </div>
 
     {% if request.user.is_student %}
@@ -61,7 +83,6 @@
 
         <button type="submit" class="btn btn-success mt-2">Start Task</button>
       </form>
-    </div>
       {%else%}
     <div class="container">
       <form action="{% url 'do_dinamic_task' %}" method="post">

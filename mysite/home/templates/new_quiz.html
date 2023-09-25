@@ -7,7 +7,7 @@
         {% csrf_token %}
         <div class="card mt-4">
             <div class="card-header">
-                {{counter}} of 5 questions
+                {{counter}} of 5 questions - Dificultad: {{ question.get_difficulty_display }}
             </div>
             <div class="card-header" id="question-text">
                 {{ question.question_text }}
@@ -33,19 +33,27 @@
         {% csrf_token %}
         <div class="card mt-4">
             <div class="card-header">
-                {{counter}} of 5 questions
+                {{counter}} of x questions - Difficulty: {{ question.get_difficulty_display }}
             </div>
             <div class="card-header" id="question-text">
                 {{ question.question_text }}
             </div>
             <ul class="list-group list-group-flush" id="answer-list">
                 {% for answer in question.get_answers %}
+                {% if answer.answer != hide_answer %}
                 <li class="list-group-item">
                     <input type="radio" name="selected_answer" value="{{ answer.answer }}" required> {{ answer.answer }}
                     <input type="hidden" name="is_correct_{{ forloop.counter }}" value="{{ answer.is_correct }}" >
                     <input type="hidden" name="question" value="{{ question.question_text }}" >
-
                 </li>
+                {% else %}
+                <li class="list-group-item">
+                    <input type="radio" name="selected_answer" value="{{ answer.answer }}" required disabled>
+                    <span style="color: gray;">{{ answer.answer }}</span>
+                    <input type="hidden" name="is_correct_{{ forloop.counter }}" value="{{ answer.is_correct }}" >
+                    <input type="hidden" name="question" value="{{ question.question_text }}" >
+                </li>
+                {% endif %}
                 {% endfor %}
             </ul>
             <div class="card-footer">

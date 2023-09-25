@@ -215,6 +215,8 @@ def do_task(request):
 
             else:
                 if question not in task.wrongs:
+                    question.user_answer = selected_answer
+                    question.save()
                     task.wrongs.append(question)
                     task.wrongs_permanent.append(question)
                 print("The selected answer is INCORRECT.")
@@ -227,9 +229,9 @@ def do_task(request):
 
 
     # get the questions
-    question = task.add_question(json_user['level'], json_user['type_task'], json_user['difficulty'])
+    question = task.add_question(json_user['theme'], json_user['type_task'], json_user['difficulty'])
     while question in task.questions:
-        question = task.add_question(json_user['level'], json_user['type_task'], json_user['difficulty'])
+        question = task.add_question(json_user['theme'], json_user['type_task'], json_user['difficulty'])
     task.questions.append(question)
     task.save()
 
@@ -295,7 +297,7 @@ def redo_task(request):
         request.user.json_user['type_task'] = 1
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
 
-    return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False})
+    return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False, 'hide_answer': task.wrongs_permanent[task.wrongs_counter].user_answer})
 
 @teacher_required
 def question_view(request):
@@ -377,7 +379,7 @@ def do_dinamic_task(request):
         task_id = str(task.uid)
         request.session['task_id'] = task_id
         request.session['redo'] = True
-        question = task.add_question(0, 1, 1)
+        question = task.add_question(1, 1, 1)
         question.replace_parameters()
         question.save()
         task.questions.append(question)

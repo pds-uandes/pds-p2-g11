@@ -27,9 +27,9 @@ class CustomUser(AbstractUser):
     total_time_spent = models.DurationField(default=timedelta())
 
     json_user = {
-    'difficulty': 1,
-    'level': 0,
-    'type_task': 1,
+    'difficulty': 1, # 1: easy, 2: medium, 3: hard, 4:DINAMIC 1 5:DINAMIC 2
+    'theme': 1, # 1: Caracteristicas de la onda, 2: Ondas Sonoras, 3: Ondas Armonicas, 4: Ecuacion de la Onda, 5: Energias e info. transferida
+    'type_task': 0, # 0: multiple choice questions, 1: numeric question
     }
 
 
@@ -40,6 +40,7 @@ class Task(BaseModel):
         'second_try_answered': False,
         'user_answered': False,
     }
+    redos = 0
     wrongs = []
     wrongs_permanent = []
     questions = []
@@ -58,9 +59,7 @@ class Task(BaseModel):
         self.trys[parameter] = True
         self.save()
 
-    def add_question(self, level, task_type, difficulty):
-        if level == 0:
-            theme = 1
+    def add_question(self, theme, task_type, difficulty):
 
         question_query = Q(difficulty=difficulty) & Q(theme=theme)
         # type 0: multiple choice questions
@@ -88,10 +87,11 @@ class Question(BaseModel):
         (5, 'Energias e info. transferida')]
 
     task = models.ForeignKey(Task, related_name='task_questions', on_delete=models.CASCADE, null=True, blank=True)
-    question_text = models.CharField(max_length=100)
+    question_text = models.CharField(max_length=1000)
     hint = models.CharField(max_length=100, null=True, blank=True)
     difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
     theme = models.IntegerField(choices=THEME_CHOICES, default=1)
+    user_answer = ''
 
     def __str__(self) -> str:
         return self.question_text
@@ -110,7 +110,7 @@ class Question(BaseModel):
 
 class Answer(BaseModel):
     question = models.ForeignKey(Question,related_name='question_answer', on_delete=models.CASCADE)
-    answer = models.CharField(max_length=100)
+    answer = models.CharField(max_length=200)
     is_correct = models.BooleanField(default=False)
 
     def __str__(self) -> str:
@@ -120,8 +120,7 @@ class Answer(BaseModel):
 class DinamicQuestion(BaseModel):
     DIFFICULTY_CHOICES = [
         (1, 'Easy'),
-        (2, 'Medium'),
-        (3, 'Hard')]
+        (2, 'Medium'),]
 
     THEME_CHOICES = [
         (1, 'Caracteristicas de la onda'),
