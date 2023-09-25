@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from datetime import timedelta
-
+from django.contrib.postgres.fields import JSONField
 
 class BaseModel(models.Model):
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4 , editable=False)
@@ -18,19 +18,10 @@ class BaseModel(models.Model):
 
 
 class CustomUser(AbstractUser):
-    is_teacher = models.BooleanField(default=False)
-    is_student = models.BooleanField(default=False)
-    name = models.CharField(max_length=255)
-    second_name = models.CharField(max_length=255)
-    last_login_time = models.DateTimeField(null=True, blank=True)
-    last_logout_time = models.DateTimeField(null=True, blank=True)
-    total_time_spent = models.DurationField(default=timedelta())
-
-    json_user = {
-    'difficulty': 1, # 1: easy, 2: medium, 3: hard, 4:DINAMIC 1 5:DINAMIC 2
-    'theme': 1}# 1: Caracteristicas de la onda, 2: Ondas Sonoras, 3: Ondas Armonicas, 4: Ecuacion de la Onda, 5: Energias e info. transferida
-
-    user_score = {
+    JSON_FIELD_USER = {
+        'difficulty': 1, # 1: easy, 2: medium, 3: hard, 4:DINAMIC 1 5:DINAMIC 2
+        'theme': 1}
+    JSON_FIELD_SCORE = {
     'tasks' : 0,
 
     'level1' : {
@@ -58,6 +49,48 @@ class CustomUser(AbstractUser):
     }
     }
 
+    is_teacher = models.BooleanField(default=False)
+    is_student = models.BooleanField(default=False)
+    name = models.CharField(max_length=255)
+    second_name = models.CharField(max_length=255)
+    last_login_time = models.DateTimeField(null=True, blank=True)
+    last_logout_time = models.DateTimeField(null=True, blank=True)
+    total_time_spent = models.DurationField(default=timedelta())
+
+    json_user = JSONField(default=JSON_FIELD_USER)
+    user_score = JSONField(default=JSON_FIELD_SCORE)
+
+    # json_user = {
+    # 'difficulty': 1, # 1: easy, 2: medium, 3: hard, 4:DINAMIC 1 5:DINAMIC 2
+    # 'theme': 1}# 1: Caracteristicas de la onda, 2: Ondas Sonoras, 3: Ondas Armonicas, 4: Ecuacion de la Onda, 5: Energias e info. transferida
+
+    # user_score = {
+    # 'tasks' : 0,
+
+    # 'level1' : {
+    #     'wrongs': 0,
+    #     'correct': 0,
+    # },
+    # 'level2' : {
+    #     'wrongs': 0,
+    #     'correct': 0,
+    # },
+
+    # 'level3' : {
+    #     'wrongs': 0,
+    #     'correct': 0,
+    # },
+
+    #     'level4' : {
+    #     'wrongs': 0,
+    #     'correct': 0,
+    # },
+
+    #     'level5' : {
+    #     'wrongs': 0,
+    #     'correct': 0,
+    # }
+    # }
 
 class Task(BaseModel):
     tries = {
