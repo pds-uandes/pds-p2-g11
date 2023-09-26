@@ -57,8 +57,8 @@ class CustomUser(AbstractUser):
     last_logout_time = models.DateTimeField(null=True, blank=True)
     total_time_spent = models.DurationField(default=timedelta())
 
-    json_user = JSONField(default=JSON_FIELD_USER)
-    user_score = JSONField(default=JSON_FIELD_SCORE)
+    json_user = models.JSONField(default=JSON_FIELD_USER)
+    user_score = models.JSONField(default=JSON_FIELD_SCORE)
 
     # json_user = {
     # 'difficulty': 1, # 1: easy, 2: medium, 3: hard, 4:DINAMIC 1 5:DINAMIC 2

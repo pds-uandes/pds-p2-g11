@@ -109,6 +109,7 @@ class StudentListView(View):
 # ================================================ HOME ====================================================================
 def home(request):
     print(request.user.user_score)
+    print(request.user.json_user)
     if 'task_id' in request.session:
         del request.session['task_id']
 
@@ -245,8 +246,11 @@ def do_task(request):
         task.save()
 
     if task.counter >= 1:
+
         if len(task.wrongs) == 0:
+            print("No wrong answers!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             request.user.json_user['difficulty'] += 1
+            request.user.save()
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': True})
 
 
@@ -320,8 +324,11 @@ def redo_task(request):
         print(task.wrongs)
         print(task.wrongs_permanent)
     task.save()
-    if task.score == 3:
+    if task.score == 1:
         request.user.json_user['difficulty'] += 1
+        print("ola")
+        print(request.user.json_user)
+        request.user.save()
 
     if task.wrongs_counter >= len(task.wrongs_permanent):
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
