@@ -467,9 +467,11 @@ def do_dinamic_task(request):
 
         if request.user.json_user['difficulty'] < 5:
             request.user.json_user['difficulty'] += 1
+            request.user.save()
         else:
             request.user.json_user['difficulty'] = 1
             request.user.json_user['theme'] += 1
+            request.user.save()
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
 
 
@@ -524,9 +526,11 @@ def redo_dinamic_task(request):
 
         if request.user.json_user['difficulty'] < 5:
             request.user.json_user['difficulty'] += 1
+            request.user.save()
         else:
             request.user.json_user['difficulty'] = 1
             request.user.json_user['theme'] += 1
+            request.user.save()
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
 
 
