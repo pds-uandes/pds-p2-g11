@@ -60,37 +60,6 @@ class CustomUser(AbstractUser):
     json_user = models.JSONField(default=JSON_FIELD_USER)
     user_score = models.JSONField(default=JSON_FIELD_SCORE)
 
-    # json_user = {
-    # 'difficulty': 1, # 1: easy, 2: medium, 3: hard, 4:DINAMIC 1 5:DINAMIC 2
-    # 'theme': 1}# 1: Caracteristicas de la onda, 2: Ondas Sonoras, 3: Ondas Armonicas, 4: Ecuacion de la Onda, 5: Energias e info. transferida
-
-    # user_score = {
-    # 'tasks' : 0,
-
-    # 'level1' : {
-    #     'wrongs': 0,
-    #     'correct': 0,
-    # },
-    # 'level2' : {
-    #     'wrongs': 0,
-    #     'correct': 0,
-    # },
-
-    # 'level3' : {
-    #     'wrongs': 0,
-    #     'correct': 0,
-    # },
-
-    #     'level4' : {
-    #     'wrongs': 0,
-    #     'correct': 0,
-    # },
-
-    #     'level5' : {
-    #     'wrongs': 0,
-    #     'correct': 0,
-    # }
-    # }
 
 class Task(BaseModel):
     tries = {

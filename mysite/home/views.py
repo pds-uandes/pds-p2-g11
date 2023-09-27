@@ -124,7 +124,18 @@ def home(request):
         task = 0
     else:
         task = 1
-    context = {'tasks': tasks, 'students': students, 'type_task': task}
+
+    THEME_CHOICES = {"1":"Caracteristicas de la onda", 
+                     "2":"Ondas Sonoras", 
+                     "3":"Ondas Armonicas", 
+                     "4":"Ecuacion de la Onda", 
+                     "5":"Energias e Info. Transferida"}
+    
+    DIFFICULTY_CHOICES = {"1":"Easy", "2":"Medium", "3":"Hard", "4":"Dinamic 1", "5":"Dinamic 2"}
+    theme = THEME_CHOICES[str(request.user.json_user['theme'])]
+    difficulty = DIFFICULTY_CHOICES[str(request.user.json_user['difficulty'])]
+
+    context = {'tasks': tasks, 'students': students, 'type_task': task, "theme":theme, "difficulty":difficulty}
     return render(request, 'home.html', context)
 
 @teacher_required

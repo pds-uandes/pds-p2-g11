@@ -77,6 +77,16 @@
     <br>
 
     {% if request.user.is_student %}
+    <div class="container text-center" style="width: 500px;">
+      <div class="card">
+        <div class="card-header">
+          Current Theme: {{ theme }}
+        </div>
+        <div class="card-header">
+           Difficulty: {{ difficulty }}
+        </div>
+      </div>
+    </div>
     {% if type_task == 0 %}
       <div class="container text-center" style="margin:auto; width:170px;">
       <form method="post" action="{% url 'do_task' %}">
