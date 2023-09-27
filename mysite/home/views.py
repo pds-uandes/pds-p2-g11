@@ -18,6 +18,8 @@ from django.contrib.auth.views import LogoutView
 from django.utils import timezone
 from .forms import QuestionForm, QuestionFormSet, AnswerFormSet
 from django.contrib import messages
+from django.shortcuts import render
+from .graph import get_graph
 
 def teacher_required(view_func):
     @login_required
@@ -474,7 +476,7 @@ def do_dinamic_task(request):
 
         task.save()
         if task.wrongs:
-            return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': answers})
+            return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': answers, })
 
         if request.user.json_user['difficulty'] < 5:
             request.user.json_user['difficulty'] += 1
@@ -487,9 +489,9 @@ def do_dinamic_task(request):
 
 
     number_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
+    graph = get_graph(task.questions[-1])
 
-
-    return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'counter': task.counter + 1, "number_of_answers": number_of_answers})
+    return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'counter': task.counter + 1, "number_of_answers": number_of_answers, 'graph': graph})
 
 # ================================================ REDO DINAMIC ====================================================================
 def redo_dinamic_task(request):
@@ -511,7 +513,8 @@ def redo_dinamic_task(request):
         task.dinamic_counter += 1
         task.save()
         request.session['redo'] = False
-        return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': wrong_answers, "number_of_answers": number_of_answers})
+        graph = get_graph(task.questions[-1])
+        return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': wrong_answers, "number_of_answers": number_of_answers, 'graph': graph})
 
     else:
         task_id = request.session['task_id']

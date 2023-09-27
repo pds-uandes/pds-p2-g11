@@ -7,6 +7,7 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib.postgres.fields import JSONField
+from sympy import sin, evalf, pi, sympify
 
 class BaseModel(models.Model):
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4 , editable=False)
@@ -219,7 +220,10 @@ class DinamicAnswer(BaseModel):
             '[FRECUENCIA]': 0,
             '[LONGITUD]': 0,
             '[PERIODO]': 0,
-            '[AMPLITUD]': 0}
+            '[AMPLITUD]': 0,
+            '[NODOS]': 0,
+            '[DENSIDAD]':0,
+            '[RANDOM]':0,}
 
     metrics = models.CharField(max_length=100)
     equation = models.CharField(max_length=1000, blank=True)
@@ -232,7 +236,10 @@ class DinamicAnswer(BaseModel):
         self.aux_equation = self.equation
         for placeholder, value in self.dic.items():
             self.equation = self.equation.replace(placeholder, str(value))
-        result = eval(self.equation)
+        
+        #result = eval(self.equation)
+        result = sympify(self.equation)
+        result = result.evalf()
         self.result = [round(result) - round(result, 3)*0.05, round(result, 3) + round(result, 3)*0.05]
         self.equation = self.aux_equation
 
