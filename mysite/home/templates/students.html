@@ -1,20 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Student List</title>
+    <title>Student Data</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1 class="mt-4">Student List</h1>
-
+        <h1 class="mt-4">Student Data</h1>
+        <div class="container text-center" style="width: 500px;">
+            
+          <h3>Topics</h3>
+            <div class="card">
+              <div class="card-header">
+                Características de la Onda
+              </div>
+              <div class="card-header">
+                Ondas Sonoras
+              </div>
+              <div class="card-header">
+                Ondas Armónicas
+              </div>
+              <div class="card-header">
+                Ecuación de la Onda
+              </div>
+              <div class="card-header">
+                Energías e Información Transferida
+              </div>
+            </div>
+          </div>
+          <br>
         {% if students %}
         <ul class="list-group mt-4">
             {% for student in students %}
             <li class="list-group-item">
                 <form action="{% url 'student_profile' student.id %}" method="get">
                     <button type="submit" class="btn btn-link">{{ student.name }} {{ student.second_name }}</button>
+                    <p><strong>Usage Time:</strong> {{student.total_time_spent }} </p>
+                    <p><strong>Worst Topic:</strong> {{ topic_with_most_wrongs }}</p>
                 </form>
             </li>
             {% endfor %}
@@ -22,6 +45,9 @@
         {% else %}
         <p class="mt-4">No students found.</p>
         {% endif %}
+        <div class="container" style="margin:auto;">
+        <a href="{% url 'home' %}" class="btn btn-primary mt-3">Back to Home</a>
+        </div>
     </div>
     
     <!-- Bootstrap JS -->

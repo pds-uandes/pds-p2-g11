@@ -9,7 +9,7 @@ from . import views
 urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', CustomLogoutView.as_view(next_page='home'), name='logout'),
-    path('students/', StudentListView.as_view(), name='student_list'),
+    path('students/', StudentListView.as_view(), name='students'),
     path('students/<int:student_id>/', student_profile, name='student_profile'),
     path('questions/', question_view, name='questions'),
     path('questions/add/', add_question_view, name='add_question'),
@@ -26,3 +26,4 @@ urlpatterns = [
     path('dinamic_results/', views.results, name='dinamic_results'),
     path('redo_dinamic_task/', views.redo_dinamic_task, name='redo_dinamic_task')
     ]
+

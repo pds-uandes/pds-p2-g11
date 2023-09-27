@@ -1,3 +1,4 @@
+{% load number_filters %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,12 +13,20 @@
         <div class="card mt-4">
             <div class="card-body">
                 <h5 class="card-title">{{ student.name }} {{ student.second_name }}</h5>
+                
                 <p><strong>Usage Time:</strong> {{student.total_time_spent }} </p>
                 <p><strong>Last Login:</strong> {{student.last_login_time}}</p>
+                <p><strong>Worst Topic:</strong> {{ topic_with_most_wrongs }}</p>
+                <p><strong>Caracteristicas de la onda Accuracy:</strong> {% if accuracies.1|is_number %}{{ accuracies.1 }}%{% else %}{{ accuracies.1 }}{% endif %}</p>
+                <p><strong>Ondas Sonoras Accuracy:</strong> {% if accuracies.2|is_number %}{{ accuracies.2 }}%{% else %}{{ accuracies.2 }}{% endif %}</p>
+                <p><strong>Ondas Armonicas</strong> {% if accuracies.3|is_number %}{{ accuracies.3 }}%{% else %}{{ accuracies.3 }}{% endif %}</p>
+                <p><strong>Ecuacion de la Onda</strong> {% if accuracies.4|is_number %}{{ accuracies.4 }}%{% else %}{{ accuracies.4 }}{% endif %}</p>
+                <p><strong>Energias e info. transferida</strong> {% if accuracies.5|is_number %}{{ accuracies.5 }}%{% else %}{{ accuracies.5 }}{% endif %}</p>
+                
             </div>
         </div>
 
-        <a href="{% url 'home' %}" class="btn btn-primary mt-4">Back to Home</a>
+        <a href="{% url 'students' %}" class="btn btn-success mt-3">Back to Students</a>
     </div>
 
     <!-- Bootstrap JS -->

@@ -98,15 +98,16 @@ class UserRegisterView(CreateView):
 
 @method_decorator(login_required, name='dispatch')
 class StudentListView(View):
-    @student_required
+    @method_decorator(teacher_required)
     def get(self, request, *args, **kwargs):
         students = CustomUser.objects.filter(is_student=True)
         return render(request, 'students.html', {'students': students})
 
 
 
-@login_required(login_url='/login/')
+
 # ================================================ HOME ====================================================================
+@login_required(login_url='/login/')
 def home(request):
     print(request.user.user_score)
     print(request.user.json_user)
@@ -127,15 +128,33 @@ def home(request):
     context = {'tasks': tasks, 'students': students, 'type_task': task}
     return render(request, 'home.html', context)
 
-@teacher_required
 # ================================================ STUDENT ====================================================================
+@teacher_required
 def student_profile(request, student_id):
     student = get_object_or_404(CustomUser, pk=student_id)
     if student.last_login_time and student.last_logout_time:
         usage_time = student.last_logout_time - student.last_login_time
     else:
         usage_time = "Not available"
-    return render(request, 'student_profile.html', {'student': student, 'usage_time': usage_time})
+
+    accuracies = {}
+    max_wrongs = 0
+    topic_with_most_wrongs = None
+    theme_names = {1: 'Caracteristicas de la onda', 2: 'Ondas Sonoras', 3: 'Ondas Armonicas', 4: 'Ecuacion de la Onda', 5: 'Energias e info. transferida'}
+    for theme in range(1, 6):  # Assuming themes are numbered from 1 to 5
+        total = student.user_score[f'level{theme}']['wrongs'] + student.user_score[f'level{theme}']['correct']
+        if total == 0:
+            accuracies[theme] = "Not enough info"
+        else:
+            accuracies[theme] = (student.user_score[f'level{theme}']['correct'] / total) * 100
+
+        if student.user_score[f'level{theme}']['wrongs'] > max_wrongs:
+            max_wrongs = student.user_score[f'level{theme}']['wrongs']
+            topic_with_most_wrongs = theme_names[theme]
+
+    return render(request, 'student_profile.html', {'student': student, 'usage_time': usage_time, 'accuracies': accuracies, 'topic_with_most_wrongs': topic_with_most_wrongs})
+
+
 
 @student_required
 # ================================================ QUIZ ====================================================================
