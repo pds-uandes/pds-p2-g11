@@ -8,26 +8,43 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <div class="container center">
         <h1 class="mt-4">Student Data</h1>
-        <div class="container text-center" style="width: 500px;">
+        <div class="container text-center" style="width: 600px;">
             
-          <table>
-            <thead>
-                <tr>
-                    <th>Topic</th>
-                    <th>Average Accuracy</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for level, accuracy in topic_accuracy.items %}
-                <tr>
-                    <td>{{ level }}</td>
-                    <td>{{ accuracy }}%</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+            {% for student in students %}
+            {% if forloop.counter == 1 %}
+                <div class="container center">
+                    <div class="row">
+                        <h3 class="mt-4"><strong>Average accuracy by topics</strong></h3>
+                            <ul class="list-group-item">
+                                {% for key, value in student.get_average_accuracies.items %}
+                                    <li class="list-group-item">
+
+                                        {% if key == 1 %}
+                                            {{ key }} <strong>Caracteristicas de la onda:</strong> {{ value|floatformat:"-2" }} %
+                                        {% endif %}
+                                        {% if key == 2 %}
+                                            {{ key }} <strong>Ondas Sonoras:</strong> {{ value|floatformat:"-2" }} %
+                                        {% endif %}
+                                        {% if key == 3 %}
+                                            {{ key }} <strong>Ondas Armonicas:</strong> {{ value|floatformat:"-2" }} %
+                                        {% endif %}
+                                        {% if key == 4 %}
+                                            {{ key }} <strong>Ecuacion de la Onda:</strong> {{ value|floatformat:"-2" }} %
+                                        {% endif %}
+                                        {% if key == 5 %}
+                                            {{ key }} <strong>Energias e info. transferida:</strong> {{ value|floatformat:"-2" }} %
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+        
         
           <br>
         {% if students %}
@@ -37,7 +54,7 @@
                 <form action="{% url 'student_profile' student.id %}" method="get">
                     <button type="submit" class="btn btn-link">{{ student.name }} {{ student.second_name }}</button>
                     <p><strong>Usage Time:</strong> {{student.total_time_spent }} </p>
-                    <p><strong>Worst Topic:</strong> {{ student.get_accuracy_and_lowest_topic }}</p>
+                    <p><strong>Worst Topic:</strong> {{ student.get_lowest_topic }}</p>
                     
                 </form>
             </li>

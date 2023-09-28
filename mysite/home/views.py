@@ -510,6 +510,7 @@ def do_dinamic_task(request):
         question.replace_parameters()
         question.wrong_answers.clear()
         question.save()
+        # tasl.
         task.questions.append(question)
         task.save()
         #Sumamos en el score del usuario

@@ -8,6 +8,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.contrib.postgres.fields import JSONField
 from sympy import sin, evalf, pi, sympify
+from django.db.models import Avg,Count
 
 class BaseModel(models.Model):
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4 , editable=False)
@@ -63,7 +64,7 @@ class CustomUser(AbstractUser):
 
     last_task = models.ForeignKey('Task', related_name='user_last_task', on_delete=models.CASCADE, null=True, blank=True)
 
-    def get_accuracy_and_lowest_topic(self):
+    def get_lowest_topic(self):
         accuracies = {}
         min_accuracy = 100
         topic_with_lowest_accuracy = None
@@ -83,6 +84,27 @@ class CustomUser(AbstractUser):
             topic_with_lowest_accuracy = "Not enough info"
 
         return topic_with_lowest_accuracy
+    
+    def get_accuracies(self):
+        accuracies = {}
+        min_accuracy = 100
+        topic_with_lowest_accuracy = None
+        theme_names = {1: 'Caracteristicas de la onda', 2: 'Ondas Sonoras', 3: 'Ondas Armonicas', 4: 'Ecuacion de la Onda', 5: 'Energias e info. transferida'}
+        for theme in range(1, 6):  # Assuming themes are numbered from 1 to 5
+            total = self.user_score[f'level{theme}']['wrongs'] + self.user_score[f'level{theme}']['correct']
+            if total == 0:
+                accuracies[theme] = "Not enough info"
+            else:
+                accuracy = (self.user_score[f'level{theme}']['correct'] / total) * 100
+                accuracies[theme] = accuracy
+                if accuracy < min_accuracy:
+                    min_accuracy = accuracy
+                    topic_with_lowest_accuracy = theme_names[theme]
+
+        if topic_with_lowest_accuracy is None:
+            topic_with_lowest_accuracy = "Not enough info"
+
+        return accuracies
 
     def get_time_per_task(self):
         print("TOTALTIMESPTEN")
@@ -95,7 +117,69 @@ class CustomUser(AbstractUser):
         level =  int(self.json_user['theme'])
         return level/total_time
     
+    #Tiempo que se demora en relacion al promedio de tiempo de los estudiantes
 
+    def get_time_relative(self):
+        student_time = self.get_time_per_task()
+        print('AAAAAAAAAAAAAAAAAAAAKASKLJDFLKGJHKGSHSD')
+        # Get the average time per task for all students
+        all_students = CustomUser.objects.filter(is_student=True)
+        total_time = 0
+        for student in all_students:
+            print('student time')
+            print(student.get_time_per_task())
+            total_time += student.get_time_per_task()
+        average_time = total_time / all_students.count() if all_students.count() > 0 else 0
+
+        # Subtract the current student's time from the average
+        relative_time = average_time - student_time
+        #Si el resultado es negativo, el estudiante se demora relativetime mas que el promedio
+        #Si el resultado es positivo, el estudiante se demora relativetime menos que el promedio
+        print('relative time')
+        print(relative_time)
+        return relative_time
+
+
+    def get_most_common_theme(self):
+        all_students = CustomUser.objects.filter(is_student=True)
+        theme_counts = all_students.values('json_user__theme').annotate(count=Count('json_user__theme')).order_by('-count')
+        most_common_theme = theme_counts[0]['json_user__theme'] if theme_counts else None
+        theme_names = {1: 'Caracteristicas de la onda', 2: 'Ondas Sonoras', 3: 'Ondas Armonicas', 4: 'Ecuacion de la Onda', 5: 'Energias e info. transferida'}
+
+        return theme_names[most_common_theme] if most_common_theme else None
+
+    def get_average_theme(self):
+        all_students = CustomUser.objects.filter(is_student=True)
+        total = 0
+        for student in all_students:
+            total += student.json_user['theme']
+        avg = total / all_students.count() if all_students.count() > 0 else None
+        theme_names = {1: 'Caracteristicas de la onda', 2: 'Ondas Sonoras', 3: 'Ondas Armonicas', 4: 'Ecuacion de la Onda', 5: 'Energias e info. transferida'}
+
+        average_theme = round(avg)
+        return theme_names[average_theme] if average_theme else None
+    def get_user_theme(self):
+        theme_names = {1: 'Caracteristicas de la onda', 2: 'Ondas Sonoras', 3: 'Ondas Armonicas', 4: 'Ecuacion de la Onda', 5: 'Energias e info. transferida'}
+        return theme_names[self.json_user['theme']]
+
+
+    def get_average_accuracies(self):
+        all_students = CustomUser.objects.filter(is_student=True)
+        total_accuracies = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+        user_count = all_students.count()
+
+        for user in all_students:
+            user_accuracies = user.get_accuracies()
+            for theme, accuracy in user_accuracies.items():
+                if accuracy != "Not enough info":
+                    total_accuracies[theme] += accuracy
+
+        average_accuracies = {theme: total / user_count for theme, total in total_accuracies.items()}
+
+        return average_accuracies
+
+
+    
 
 class Task(BaseModel):
     tries = {
@@ -158,6 +242,7 @@ class Question(BaseModel):
         (4, 'Ecuacion de la Onda'),
         (5, 'Energias e info. transferida')]
 
+   
     task = models.ForeignKey(Task, related_name='task_questions', on_delete=models.CASCADE, null=True, blank=True)
     question_text = models.CharField(max_length=1000)
     hint = models.CharField(max_length=200, null=True, blank=True)

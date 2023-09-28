@@ -24,35 +24,20 @@
                 
                 <p><strong>Usage Time:</strong> {{student.total_time_spent }} </p>
                 <p><strong>Last Login:</strong> {{student.last_login_time}}</p>
-                <p><strong>Worst Topic:</strong> {{ topic_with_lowest_accuracy }}</p>
-                <p><strong>Time per task:</strong> {{ student.get_time_per_task }} minutes</p>
-                <p><strong>Time per level:</strong> {{ student.get_time_per_level }} minutes</p>
-              
-                <!-- Collapsible Data -->
-                <div id="accordion">
-                    <div class="card">
-                        <div class="card-header" id="headingLastTask">
-                            <h5 class="mb-0">
-                                <button class="btn btn-link text-dark" data-toggle="collapse" data-target="#collapseLastTask" aria-expanded="true" aria-controls="collapseLastTask">
-                                    Last Task
-                                </button>
-                            </h5>
-                        </div>
+                <p><strong>Worst Topic:</strong> {{ topic_with_lowest_accuracy }} minutes</p>
+                <p><strong>Time per task:</strong> {{ student.get_time_per_task|floatformat:"-2" }} minutes</p>
+                <p><strong>Time per level:</strong> {{ student.get_time_per_level|floatformat:"-2" }} minutes</p>
+                {% if student.get_time_relative > 0 %}
+                <p><strong>The student takes </strong> {{ student.get_time_relative|floatformat:"-2"  }} minutes less than the average</p>
+                {% else %}
+                <p><strong>The student takes </strong> {{ student.get_time_relative|floatformat:"-2" }} minutes more than the average</p>
+                <p><light>  The result is negative because it takes more than the average</light></p>
+                {% endif %}
+                <p><strong> The user is currently on the theme: </strong> {{ student.get_user_theme }} </p>
+                <p><strong> The theme where most users are (Mode): </strong> {{ student.get_most_common_theme  }} </p>
+                <p><strong> The theme where most users are on average (Average):   </strong> {{ student.get_average_theme  }} </p>
 
-                        <div id="collapseLastTask" class="collapse" aria-labelledby="headingLastTask" data-parent="#accordion">
-                            <div class="card-body">
-                                <p><strong>TASK ID:</strong> {{ student.last_task.uid }}</p>
-                                {% for question in student.last_task.questions %}
-                                <div class="question">
-                                    <p><strong>Question:</strong> {{ question.question_text }}</p>
-                                    <p><strong>Student Answer:</strong> {{ question.user_answer }}</p>
-                                    <p><strong>Correct Answer:</strong> {{ question.real_answer }}</p>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
 
 
                 
@@ -125,6 +110,30 @@
                         </div>
                     </div>
                 </div>
+                                <!-- Collapsible Data -->
+                                <div id="accordion">
+                                    <div class="card">
+                                        <div class="card-header" id="headingLastTask">
+                                            <h5 class="mb-0">
+                                                <button class="btn btn-link text-dark" data-toggle="collapse" data-target="#collapseLastTask" aria-expanded="true" aria-controls="collapseLastTask">
+                                                    Last Task
+                                                </button>
+                                            </h5>
+                                        </div>
+                
+                                        <div id="collapseLastTask" class="collapse" aria-labelledby="headingLastTask" data-parent="#accordion">
+                                            <div class="card-body">
+                                                {% for question in student.last_task.questions %}
+                                                <div class="question">
+                                                    <p><strong>Question:</strong> {{ question.question_text }}</p>
+                                                    <p><strong>Student Answer:</strong> {{ question.user_answer }}</p>
+                                                    <p><strong>Correct Answer:</strong> {{ question.real_answer }}</p>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
             </div>
         </div>
 
