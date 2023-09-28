@@ -7,6 +7,7 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib.postgres.fields import JSONField
+from sympy import sin, evalf, pi, sympify
 
 class BaseModel(models.Model):
     uid = models.UUIDField(primary_key=True, default=uuid.uuid4 , editable=False)
@@ -60,37 +61,6 @@ class CustomUser(AbstractUser):
     json_user = models.JSONField(default=JSON_FIELD_USER)
     user_score = models.JSONField(default=JSON_FIELD_SCORE)
 
-    # json_user = {
-    # 'difficulty': 1, # 1: easy, 2: medium, 3: hard, 4:DINAMIC 1 5:DINAMIC 2
-    # 'theme': 1}# 1: Caracteristicas de la onda, 2: Ondas Sonoras, 3: Ondas Armonicas, 4: Ecuacion de la Onda, 5: Energias e info. transferida
-
-    # user_score = {
-    # 'tasks' : 0,
-
-    # 'level1' : {
-    #     'wrongs': 0,
-    #     'correct': 0,
-    # },
-    # 'level2' : {
-    #     'wrongs': 0,
-    #     'correct': 0,
-    # },
-
-    # 'level3' : {
-    #     'wrongs': 0,
-    #     'correct': 0,
-    # },
-
-    #     'level4' : {
-    #     'wrongs': 0,
-    #     'correct': 0,
-    # },
-
-    #     'level5' : {
-    #     'wrongs': 0,
-    #     'correct': 0,
-    # }
-    # }
 
 class Task(BaseModel):
     tries = {
@@ -155,6 +125,7 @@ class Question(BaseModel):
     difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
     theme = models.IntegerField(choices=THEME_CHOICES, default=1)
     user_answer = ''
+    real_answer = ''
 
     def __str__(self) -> str:
         return self.question_text
@@ -192,6 +163,17 @@ class DinamicQuestion(BaseModel):
         (4, 'Ecuacion de la Onda'),
         (5, 'Energias e Info. Transferida')]
 
+    dic = {"[VELOCIDAD]": 0,
+            "[TIEMPO]": 0,
+            "[DISTANCIA]": 0,
+            '[FRECUENCIA]': 0,
+            '[LONGITUD]': 0,
+            '[PERIODO]': 0,
+            '[AMPLITUD]': 0,
+            '[NODOS]': 0,
+            '[DENSIDAD]':0,
+            '[RANDOM]':0,}
+
     task = models.ForeignKey(Task, related_name='dinamic_task_questions', on_delete=models.CASCADE, null=True, blank=True)
 
     question_text = models.CharField(max_length=1000)
@@ -224,6 +206,7 @@ class DinamicQuestion(BaseModel):
         replaced_text = self.question_text
         for parameter in self.parameters:
             replaced_text = replaced_text.replace(parameter.parameter, str(parameter.value))
+            self.dic[parameter.parameter] = parameter.value
         self.replaced_text = replaced_text
 
     def get_answers(self):
@@ -250,10 +233,14 @@ class DinamicAnswer(BaseModel):
             '[FRECUENCIA]': 0,
             '[LONGITUD]': 0,
             '[PERIODO]': 0,
-            '[AMPLITUD]': 0}
+            '[AMPLITUD]': 0,
+            '[NODOS]': 0,
+            '[DENSIDAD]':0,
+            '[RANDOM]':0,}
 
     metrics = models.CharField(max_length=100)
     equation = models.CharField(max_length=1000, blank=True)
+    hint = models.CharField(max_length=200)
     user_answer = 0
 
     def __str__(self) -> str:
@@ -263,7 +250,10 @@ class DinamicAnswer(BaseModel):
         self.aux_equation = self.equation
         for placeholder, value in self.dic.items():
             self.equation = self.equation.replace(placeholder, str(value))
-        result = eval(self.equation)
+        
+        #result = eval(self.equation)
+        result = sympify(self.equation)
+        result = result.evalf()
         self.result = [round(result) - round(result, 3)*0.05, round(result, 3) + round(result, 3)*0.05]
         self.equation = self.aux_equation
 
@@ -282,13 +272,10 @@ class Parameters(BaseModel):
     parameter = models.CharField(max_length=100)
     min_val = models.IntegerField(default=0)
     max_val = models.IntegerField(default=0)
-    value = None
 
-    def generate_random_value(self):
-        min_value = self.min_val
-        max_value = self.max_val
-        value = random.randint(min_value, max_value)
-        self.value = value
+    def generate_random_value(self, *args, **kwargs):
+        self.value = random.randint(self.min_val, self.max_val)
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.parameter

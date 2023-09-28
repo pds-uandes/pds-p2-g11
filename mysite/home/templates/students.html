@@ -1,10 +1,17 @@
 <!DOCTYPE html>
+{% load static %}
+{% load number_filters %}
 <html>
 <head>
     <title>Student Data</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
+{% for theme, accuracy in average_accuracies.items %}
+    <div class="card-header">
+        {{ theme }}: {% if accuracy|is_number %}{{ accuracy }}%{% else %}{{ accuracy }}{% endif %}
+    </div>
+{% endfor %}
 <body>
     <div class="container">
         <h1 class="mt-4">Student Data</h1>
@@ -37,7 +44,7 @@
                 <form action="{% url 'student_profile' student.id %}" method="get">
                     <button type="submit" class="btn btn-link">{{ student.name }} {{ student.second_name }}</button>
                     <p><strong>Usage Time:</strong> {{student.total_time_spent }} </p>
-                    <p><strong>Worst Topic:</strong> {{ topic_with_most_wrongs }}</p>
+                    
                 </form>
             </li>
             {% endfor %}

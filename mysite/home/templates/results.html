@@ -44,13 +44,17 @@
             </div>
             <div class="card-body">
                 {{ question.question_text }}
+            </div>
+            <div class="card-body">
                 <p>
                     <b>Tu respuesta: </b> {{question.user_answer}}
                 </p>
-            </div>
-            <div class="card-body">
+            {% if redo %}
             <p><b>Hint: </b>{{ question.hint }}</p>
+            {% else %}
+                <p><b>Correct Answer: </b>{{ question.real_answer }}</p>
             </div>
+            {% endif %}
         </div>
         </div>
         <br>

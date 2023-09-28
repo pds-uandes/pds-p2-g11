@@ -18,6 +18,8 @@ from django.contrib.auth.views import LogoutView
 from django.utils import timezone
 from .forms import QuestionForm, QuestionFormSet, AnswerFormSet
 from django.contrib import messages
+from django.shortcuts import render
+from .graph import get_graph
 
 def teacher_required(view_func):
     @login_required
@@ -125,11 +127,49 @@ def home(request):
         task = 0
     else:
         task = 1
-    context = {'tasks': tasks, 'students': students, 'type_task': task}
+
+    THEME_CHOICES = {"1":"Caracteristicas de la onda", 
+                     "2":"Ondas Sonoras", 
+                     "3":"Ondas Armonicas", 
+                     "4":"Ecuacion de la Onda", 
+                     "5":"Energias e Info. Transferida"}
+    
+    DIFFICULTY_CHOICES = {"1":"Easy", "2":"Medium", "3":"Hard", "4":"Dinamic 1", "5":"Dinamic 2"}
+    theme = THEME_CHOICES[str(request.user.json_user['theme'])]
+    difficulty = DIFFICULTY_CHOICES[str(request.user.json_user['difficulty'])]
+
+    context = {'tasks': tasks, 'students': students, 'type_task': task, "theme":theme, "difficulty":difficulty}
     return render(request, 'home.html', context)
 
 # ================================================ STUDENT ====================================================================
 @teacher_required
+def students_data(request, student_id):
+    students = CustomUser.objects.all()
+    theme_names = {1: 'Caracteristicas de la onda', 2: 'Ondas Sonoras', 3: 'Ondas Armonicas', 4: 'Ecuacion de la Onda', 5: 'Energias e info. transferida'}
+    theme_totals = {theme: {'total': 0, 'count': 0} for theme in theme_names.values()}
+    
+    for student in students:
+        for theme in range(1, 6):  # Assuming themes are numbered from 1 to 5
+            total = student.user_score[f'level{theme}']['wrongs'] + student.user_score[f'level{theme}']['correct']
+            if total > 0:
+                accuracy = (student.user_score[f'level{theme}']['correct'] / total) * 100
+                theme_totals[theme_names[theme]]['total'] += accuracy
+                theme_totals[theme_names[theme]]['count'] += 1
+
+    average_accuracies = {theme: "Not enough info" if data['count'] == 0 else data['total'] / data['count'] for theme, data in theme_totals.items()}
+
+    # Get the single student
+    single_student = get_object_or_404(CustomUser, pk=student_id)
+    single_student_accuracies = {}
+    for theme in range(1, 6):
+        total = single_student.user_score[f'level{theme}']['wrongs'] + single_student.user_score[f'level{theme}']['correct']
+        if total == 0:
+            single_student_accuracies[theme_names[theme]] = "Not enough info"
+        else:
+            single_student_accuracies[theme_names[theme]] = (single_student.user_score[f'level{theme}']['correct'] / total) * 100
+
+    return render(request, 'student_profile.html', {'student': single_student, 'average_accuracies': average_accuracies, 'single_student_accuracies': single_student_accuracies})
+
 def student_profile(request, student_id):
     student = get_object_or_404(CustomUser, pk=student_id)
     if student.last_login_time and student.last_logout_time:
@@ -138,21 +178,26 @@ def student_profile(request, student_id):
         usage_time = "Not available"
 
     accuracies = {}
-    max_wrongs = 0
-    topic_with_most_wrongs = None
+    min_accuracy = 100
+    topic_with_lowest_accuracy = None
     theme_names = {1: 'Caracteristicas de la onda', 2: 'Ondas Sonoras', 3: 'Ondas Armonicas', 4: 'Ecuacion de la Onda', 5: 'Energias e info. transferida'}
     for theme in range(1, 6):  # Assuming themes are numbered from 1 to 5
         total = student.user_score[f'level{theme}']['wrongs'] + student.user_score[f'level{theme}']['correct']
         if total == 0:
             accuracies[theme] = "Not enough info"
         else:
-            accuracies[theme] = (student.user_score[f'level{theme}']['correct'] / total) * 100
+            accuracy = (student.user_score[f'level{theme}']['correct'] / total) * 100
+            accuracies[theme] = accuracy
+            if accuracy < min_accuracy:
+                min_accuracy = accuracy
+                topic_with_lowest_accuracy = theme_names[theme]
 
-        if student.user_score[f'level{theme}']['wrongs'] > max_wrongs:
-            max_wrongs = student.user_score[f'level{theme}']['wrongs']
-            topic_with_most_wrongs = theme_names[theme]
+    if topic_with_lowest_accuracy is None:
+        topic_with_lowest_accuracy = "Not enough info"
 
-    return render(request, 'student_profile.html', {'student': student, 'usage_time': usage_time, 'accuracies': accuracies, 'topic_with_most_wrongs': topic_with_most_wrongs})
+    return render(request, 'student_profile.html', {'student': student, 'usage_time': usage_time, 'accuracies': accuracies, 'topic_with_lowest_accuracy': topic_with_lowest_accuracy})
+
+
 
 
 
@@ -232,7 +277,6 @@ def do_task(request):
             question = Question.objects.get(question_text=question_text)
             selected_answer = request.POST.get('selected_answer')
             question.user_answer = selected_answer
-            question.save()
             # Get the correct answer from the question's answers
             correct_answer = None
 
@@ -243,6 +287,12 @@ def do_task(request):
 
             print(f"Correct answer: {correct_answer}")
             print(f"Selected answer: {selected_answer}")
+            question.real_answer = correct_answer
+            # task.questions[-1].user_answer = selected_answer
+
+            task.questions[-1].user_answer = selected_answer
+            task.questions[-1].real_answer = correct_answer
+            question.save()
 
             # Compare the selected answer with the correct answer
             if selected_answer == correct_answer:
@@ -267,7 +317,6 @@ def do_task(request):
     if task.counter >= 1:
 
         if len(task.wrongs) == 0:
-            print("No wrong answers!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             request.user.json_user['difficulty'] += 1
             request.user.save()
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': True})
@@ -315,7 +364,8 @@ def redo_task(request):
         question_text = request.POST.get('question')
         question = Question.objects.get(question_text=question_text)
         selected_answer = request.POST.get('selected_answer')
-
+        question.user_answer = selected_answer
+        question.save()
         # Get the correct answer from the question's answers
         correct_answer = None
 
@@ -326,7 +376,7 @@ def redo_task(request):
 
         print(f"Correct answer: {correct_answer}")
         print(f"Selected answer: {selected_answer}")
-
+        
         print(task.wrongs)
 
         # Compare the selected answer with the correct answer
@@ -467,7 +517,6 @@ def do_dinamic_task(request):
                 if user_answer >= res[0] and user_answer <= res[1]:
                     print(f"Range: {res[0]} - {res[1]}")
                     task.score += 1
-                    #Sumamos en el score del usuario
                     request.user.user_score[get_theme(question.theme)]['correct'] += 1
                     request.user.save()
                     #---------------------#
@@ -478,8 +527,7 @@ def do_dinamic_task(request):
                     request.user.user_score[get_theme(question.theme)]['wrongs'] += 1
                     request.user.save()
                     #---------------------#
-                    print("wrong answers: ",question.wrong_answers)
-
+                    print("wrong answers: ",question.wrong_answers)    
         task.save()
         if task.wrongs:
             return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': answers})
@@ -493,11 +541,10 @@ def do_dinamic_task(request):
             request.user.save()
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
 
+    nuer_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
+    graph = get_graph(task.questions[-1])
 
-    number_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
-
-
-    return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'counter': task.counter + 1, "number_of_answers": number_of_answers})
+    return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'counter': task.counter + 1, "number_of_answers": number_of_answers, 'graph': graph})
 
 # ================================================ REDO DINAMIC ====================================================================
 def redo_dinamic_task(request):
@@ -519,7 +566,8 @@ def redo_dinamic_task(request):
         task.dinamic_counter += 1
         task.save()
         request.session['redo'] = False
-        return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': wrong_answers, "number_of_answers": number_of_answers})
+        graph = get_graph(task.questions[-1])
+        return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': wrong_answers, "number_of_answers": number_of_answers, 'graph': graph})
 
     else:
         task_id = request.session['task_id']

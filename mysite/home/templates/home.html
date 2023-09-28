@@ -78,6 +78,16 @@
     <br>
     {% endif %}
     {% if request.user.is_student %}
+    <div class="container text-center" style="width: 500px;">
+      <div class="card">
+        <div class="card-header">
+          Current Theme: {{ theme }}
+        </div>
+        <div class="card-header">
+           Difficulty: {{ difficulty }}
+        </div>
+      </div>
+    </div>
     {% if type_task == 0 %}
       <div class="container text-center" style="margin:auto; width:170px;">
       <form method="post" action="{% url 'do_task' %}">
@@ -99,17 +109,20 @@
     <br>
     <div class="d-flex justify-content-center flex-column">
       {% if request.user.is_teacher %}
-        <a href="{% url 'questions' %}" class="btn btn-primary mb-2">Manage Questions</a>
+        <a href="{% url 'questions' %}" class="btn btn-primary mt-2">Manage Questions</a>
       {% endif %}
       {% if request.user.is_teacher %}
-        <a href="{% url 'students' %}" class="btn btn-success mb-2">Students Management</a>
+        <a href="{% url 'students' %}" class="btn btn-success mt-2">Students Management</a>
       {% endif %}
-      {% if request.user.is_authenticated %}
-        <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+      {% if request.user.is_teacher %}
+      <a href="{% url 'logout' %}" class="btn btn-danger mt-2" >Logout</a>
       {% endif %}
     </div>
-    
-    
+    {% if not request.user.is_teacher and not request.user.is_student %}
+    <div class="d-flex justify-content-center">
+      <a href="{% url 'logout' %}" class="btn btn-danger" style="width:100px;">Logout</a>
+    </div>
+    {% endif %}
     </div>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

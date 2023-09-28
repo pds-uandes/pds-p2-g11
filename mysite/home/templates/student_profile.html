@@ -1,4 +1,5 @@
 {% load number_filters %}
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,13 +17,18 @@
                 
                 <p><strong>Usage Time:</strong> {{student.total_time_spent }} </p>
                 <p><strong>Last Login:</strong> {{student.last_login_time}}</p>
-                <p><strong>Worst Topic:</strong> {{ topic_with_most_wrongs }}</p>
+                <p><strong>Worst Topic:</strong> {{ topic_with_lowest_accuracy }}</p>
                 <p><strong>Caracteristicas de la onda Accuracy:</strong> {% if accuracies.1|is_number %}{{ accuracies.1 }}%{% else %}{{ accuracies.1 }}{% endif %}</p>
                 <p><strong>Ondas Sonoras Accuracy:</strong> {% if accuracies.2|is_number %}{{ accuracies.2 }}%{% else %}{{ accuracies.2 }}{% endif %}</p>
                 <p><strong>Ondas Armonicas</strong> {% if accuracies.3|is_number %}{{ accuracies.3 }}%{% else %}{{ accuracies.3 }}{% endif %}</p>
                 <p><strong>Ecuacion de la Onda</strong> {% if accuracies.4|is_number %}{{ accuracies.4 }}%{% else %}{{ accuracies.4 }}{% endif %}</p>
                 <p><strong>Energias e info. transferida</strong> {% if accuracies.5|is_number %}{{ accuracies.5 }}%{% else %}{{ accuracies.5 }}{% endif %}</p>
-                
+                {% for theme, accuracy in average_accuracies.items %}
+                <p><strong>{{ theme }} Average Accuracy:</strong> {% if accuracy|is_number %}{{ accuracy }}%{% else %}{{ accuracy }}{% endif %}</p>
+                {% endfor %}
+                {% for theme, accuracy in single_student_accuracies.items %}
+                <p><strong>{{ student.name }} {{ student.second_name }} {{ theme }} Accuracy:</strong> {% if accuracy|is_number %}{{ accuracy }}%{% else %}{{ accuracy }}{% endif %}</p>
+                {% endfor %}
             </div>
         </div>
 
