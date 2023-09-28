@@ -470,6 +470,7 @@ def do_dinamic_task(request):
         json_user = request.user.json_user
         question = task.add_question(json_user['theme'], json_user['difficulty']) # theme, task_type, difficulty
         question.replace_parameters()
+        question.wrong_answers.clear()
         question.save()
         task.questions.append(question)
         task.save()
@@ -490,6 +491,7 @@ def do_dinamic_task(request):
                 user_answer = float(request.POST.get(f'userAnswer{i+1}'))
                 print(f"User answer {a}: {user_answer}")
                 a.user_answer = user_answer
+                
                 a.save()
                 if user_answer >= res[0] and user_answer <= res[1]:
                     print(f"Range: {res[0]} - {res[1]}")
@@ -520,7 +522,6 @@ def do_dinamic_task(request):
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
 
     number_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
-    print(number_of_answers)
     graph = get_graph(task.questions[-1])
 
     return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'counter': task.counter + 1, "number_of_answers": number_of_answers, 'graph': graph})
@@ -559,10 +560,10 @@ def redo_dinamic_task(request):
             for i,a in enumerate(answers):
                 res = a.get_result()
                 user_answer = float(request.POST.get(f'userAnswer{i+1}'))
-                a.user_answer = user_answer
-                a.save()
                 if user_answer >= res[0] and user_answer <= res[1]:
                     task.score += 1
+                    a.user_answer = user_answer
+                    a.save()
                     question.wrong_answers.remove(a)
                     #Sumamos en el score del usuario
                     request.user.user_score[get_theme(question.theme)]['correct'] += 1
