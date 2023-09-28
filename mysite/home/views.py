@@ -519,7 +519,8 @@ def do_dinamic_task(request):
         request.user.last_task = task
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
 
-    nuer_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
+    number_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
+    print(number_of_answers)
     graph = get_graph(task.questions[-1])
 
     return render(request, 'dinamic_task.html', {'question': task.questions[-1], 'counter': task.counter + 1, "number_of_answers": number_of_answers, 'graph': graph})

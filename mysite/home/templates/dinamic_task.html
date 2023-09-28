@@ -18,10 +18,17 @@
                         <p id="questionText">{{ question.replaced_text }}</p>
                     </div>
                     {% for i in number_of_answers %}
+                    {% if i not in question.wrong_answers %}
+                        <div class="form-group">
+                            <label for="userAnswer{{ forloop.counter }}">{{ forloop.counter }}.</label>
+                            <input type="number" class="form-control" id="userAnswer{{ forloop.counter }}" name="userAnswer{{ forloop.counter }}" placeholder="{{i.answer}}" step="any" style="width:400px;" disabled>{{i.metrics}}
+                        </div>
+                    {%else%}
                         <div class="form-group">
                             <label for="userAnswer{{ forloop.counter }}">{{ forloop.counter }}.</label>
                             <input type="number" class="form-control" id="userAnswer{{ forloop.counter }}" name="userAnswer{{ forloop.counter }}" placeholder="Enter answer" step="any" style="width:400px;" required>{{i.metrics}}
                         </div>
+                    {%endif%}
                     {% endfor %}
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>

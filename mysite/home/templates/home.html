@@ -104,7 +104,11 @@
         <button type="submit" class="btn btn-success mt-2">Start Task</button>
       </form>
     </div>
-      {% endif %}
+    {% endif %}
+    <br><br><br>
+    <div class="d-flex justify-content-center">
+      <a href="{% url 'logout' %}" class="btn btn-danger" style="width:100px;">Logout</a>
+    </div>
     {% endif %}
     <br>
     <div class="d-flex justify-content-center flex-column">
