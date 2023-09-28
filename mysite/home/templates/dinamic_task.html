@@ -21,7 +21,7 @@
                     {% if i not in question.wrong_answers %}
                         <div class="form-group">
                             <label for="userAnswer{{ forloop.counter }}">{{ forloop.counter }}.</label>
-                            <input type="number" class="form-control" id="userAnswer{{ forloop.counter }}" name="userAnswer{{ forloop.counter }}" placeholder="{{i.answer}}" step="any" style="width:400px;" disabled>{{i.metrics}}
+                            <input type="number" class="form-control" id="userAnswer{{ forloop.counter }}" name="userAnswer{{ forloop.counter }}" placeholder="{{ i.user_answer }}" step="any" style="width:400px;" value="{{ i.user_answer }}" readonly>{{i.metrics}}
                         </div>
                     {%else%}
                         <div class="form-group">
