@@ -7,35 +7,28 @@
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
-{% for theme, accuracy in average_accuracies.items %}
-    <div class="card-header">
-        {{ theme }}: {% if accuracy|is_number %}{{ accuracy }}%{% else %}{{ accuracy }}{% endif %}
-    </div>
-{% endfor %}
 <body>
     <div class="container">
         <h1 class="mt-4">Student Data</h1>
         <div class="container text-center" style="width: 500px;">
             
-          <h3>Topics</h3>
-            <div class="card">
-              <div class="card-header">
-                Características de la Onda
-              </div>
-              <div class="card-header">
-                Ondas Sonoras
-              </div>
-              <div class="card-header">
-                Ondas Armónicas
-              </div>
-              <div class="card-header">
-                Ecuación de la Onda
-              </div>
-              <div class="card-header">
-                Energías e Información Transferida
-              </div>
-            </div>
-          </div>
+          <table>
+            <thead>
+                <tr>
+                    <th>Topic</th>
+                    <th>Average Accuracy</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for level, accuracy in topic_accuracy.items %}
+                <tr>
+                    <td>{{ level }}</td>
+                    <td>{{ accuracy }}%</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        
           <br>
         {% if students %}
         <ul class="list-group mt-4">
@@ -44,6 +37,7 @@
                 <form action="{% url 'student_profile' student.id %}" method="get">
                     <button type="submit" class="btn btn-link">{{ student.name }} {{ student.second_name }}</button>
                     <p><strong>Usage Time:</strong> {{student.total_time_spent }} </p>
+                    <p><strong>Worst Topic:</strong> {{ student.get_accuracy_and_lowest_topic }}</p>
                     
                 </form>
             </li>
@@ -56,7 +50,7 @@
         <a href="{% url 'home' %}" class="btn btn-primary mt-3">Back to Home</a>
         </div>
     </div>
-    
+
     <!-- Bootstrap JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>

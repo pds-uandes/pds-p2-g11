@@ -103,7 +103,7 @@ class StudentListView(View):
     @method_decorator(teacher_required)
     def get(self, request, *args, **kwargs):
         students = CustomUser.objects.filter(is_student=True)
-        return render(request, 'students.html', {'students': students})
+        return render(request, 'students.html', {'students': students })
 
 
 
@@ -168,10 +168,45 @@ def student_profile(request, student_id):
     if topic_with_lowest_accuracy is None:
         topic_with_lowest_accuracy = "Not enough info"
 
-    return render(request, 'student_profile.html', {'student': student, 'usage_time': usage_time, 'accuracies': accuracies, 'topic_with_lowest_accuracy': topic_with_lowest_accuracy})
+    context = {
+        'student': student,
+        'usage_time': usage_time,
+        'accuracies': accuracies,
+        'topic_with_lowest_accuracy': topic_with_lowest_accuracy,
+    }
+
+    return render(request, 'student_profile.html', context)
 
 
+@teacher_required
+def students(request):
+    # Initialize dictionaries to store topic-wise counts.
+    topic_correct_counts = {}
+    topic_wrong_counts = {}
 
+    # Query all student records
+    students = CustomUser.objects.filter(is_student=True)
+
+    # Iterate through students and update counts
+    for student in students:
+        for level, scores in student.user_score.items():
+            if level.startswith('level'):
+                correct = scores['correct']
+                wrong = scores['wrongs']
+                topic_correct_counts[level] = topic_correct_counts.get(level, 0) + correct
+                topic_wrong_counts[level] = topic_wrong_counts.get(level, 0) + wrong
+
+    # Calculate average accuracy for each topic
+    topic_accuracy = {}
+    for level in topic_correct_counts:
+        total_attempts = topic_correct_counts[level] + topic_wrong_counts[level]
+        if total_attempts > 0:
+            accuracy = (topic_correct_counts[level] / total_attempts) * 100
+            topic_accuracy[level] = accuracy
+        else:
+            topic_accuracy[level] = 0  # Handle division by zero if needed
+    print("topic accuracy:",topic_accuracy)
+    return render(request, 'students.html', {'topic_accuracy': topic_accuracy})
 
 
 @student_required
@@ -293,9 +328,11 @@ def do_task(request):
             request.user.json_user['difficulty'] += 1
             request.user.save()
 
+
             #Agregamos task al usuario
             
         request.user.last_task = task
+        request.user.save()
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': True})
 
 
@@ -377,6 +414,7 @@ def redo_task(request):
 
     if task.wrongs_counter >= len(task.wrongs_permanent):
         request.user.last_task = task
+        request.user.save()
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
 
     return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False, 'hide_answer': task.wrongs_permanent[task.wrongs_counter].user_answer, 'total_wrongs': len(task.wrongs_permanent)})
@@ -517,6 +555,7 @@ def do_dinamic_task(request):
             request.user.json_user['theme'] += 1
             request.user.save()
         request.user.last_task = task
+        request.user.save()
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
 
     number_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
@@ -579,6 +618,7 @@ def redo_dinamic_task(request):
             request.user.save()
             
         request.user.last_task = task
+        request.user.save()
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
 
 

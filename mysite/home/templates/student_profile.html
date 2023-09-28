@@ -6,6 +6,13 @@
     <title>Student Profile</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<!-- Popper.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
 </head>
 <body>
     <div class="container">
@@ -18,11 +25,106 @@
                 <p><strong>Usage Time:</strong> {{student.total_time_spent }} </p>
                 <p><strong>Last Login:</strong> {{student.last_login_time}}</p>
                 <p><strong>Worst Topic:</strong> {{ topic_with_lowest_accuracy }}</p>
-                <p><strong>Caracteristicas de la onda Accuracy:</strong> {% if accuracies.1|is_number %}{{ accuracies.1 }}%{% else %}{{ accuracies.1 }}{% endif %}</p>
-                <p><strong>Ondas Sonoras Accuracy:</strong> {% if accuracies.2|is_number %}{{ accuracies.2 }}%{% else %}{{ accuracies.2 }}{% endif %}</p>
-                <p><strong>Ondas Armonicas</strong> {% if accuracies.3|is_number %}{{ accuracies.3 }}%{% else %}{{ accuracies.3 }}{% endif %}</p>
-                <p><strong>Ecuacion de la Onda</strong> {% if accuracies.4|is_number %}{{ accuracies.4 }}%{% else %}{{ accuracies.4 }}{% endif %}</p>
-                <p><strong>Energias e info. transferida</strong> {% if accuracies.5|is_number %}{{ accuracies.5 }}%{% else %}{{ accuracies.5 }}{% endif %}</p>
+                <p><strong>Time per task:</strong> {{ student.get_time_per_task }} minutes</p>
+                <p><strong>Time per level:</strong> {{ student.get_time_per_level }} minutes</p>
+              
+                <!-- Collapsible Data -->
+                <div id="accordion">
+                    <div class="card">
+                        <div class="card-header" id="headingLastTask">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link text-dark" data-toggle="collapse" data-target="#collapseLastTask" aria-expanded="true" aria-controls="collapseLastTask">
+                                    Last Task
+                                </button>
+                            </h5>
+                        </div>
+
+                        <div id="collapseLastTask" class="collapse" aria-labelledby="headingLastTask" data-parent="#accordion">
+                            <div class="card-body">
+                                <p><strong>TASK ID:</strong> {{ student.last_task.uid }}</p>
+                                {% for question in student.last_task.questions %}
+                                <div class="question">
+                                    <p><strong>Question:</strong> {{ question.question_text }}</p>
+                                    <p><strong>Student Answer:</strong> {{ question.user_answer }}</p>
+                                    <p><strong>Correct Answer:</strong> {{ question.real_answer }}</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                
+                <!-- Collapsible Data -->
+                <div id="accordion">
+                    <div class="card">
+                        <div class="card-header" id="headingOne">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link text-dark" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    Accuracy by Topic
+                                </button>
+                            </h5>
+                        </div>
+
+                        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                            <div class="card-body">
+                                <ul>
+                                    <li>
+                                        Caracteristicas de la onda
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: {% if accuracies.1|is_number %}{{ accuracies.1 }}{% else %}0{% endif %}%;" aria-valuenow="{% if accuracies.1|is_number %}{{ accuracies.1 }}{% else %}0{% endif %}" aria-valuemin="0" aria-valuemax="100">
+                                                {% if accuracies.1|is_number %}{{ accuracies.1 }}%{% else %}N/A{% endif %}
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        Ondas Sonoras
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: {% if accuracies.2|is_number %}{{ accuracies.2 }}{% else %}0{% endif %}%;" aria-valuenow="{% if accuracies.2|is_number %}{{ accuracies.2 }}{% else %}0{% endif %}" aria-valuemin="0" aria-valuemax="100">
+                                                {% if accuracies.2|is_number %}{{ accuracies.2 }}%{% else %}N/A{% endif %}
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        Ondas Armonicas
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: {% if accuracies.3|is_number %}{{ accuracies.3 }}{% else %}0{% endif %}%;" aria-valuenow="{% if accuracies.3|is_number %}{{ accuracies.3 }}{% else %}0{% endif %}" aria-valuemin="0" aria-valuemax="100">
+                                                {% if accuracies.3|is_number %}{{ accuracies.3 }}%{% else %}N/A{% endif %}
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        Ecuacion de la Onda
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: {% if accuracies.4|is_number %}{{ accuracies.4 }}{% else %}0{% endif %}%;" aria-valuenow="{% if accuracies.4|is_number %}{{ accuracies.4 }}{% else %}0{% endif %}" aria-valuemin="0" aria-valuemax="100">
+                                                {% if accuracies.4|is_number %}{{ accuracies.4 }}%{% else %}N/A{% endif %}
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        Energias e info. transferida
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: {% if accuracies.5|is_number %}{{ accuracies.5 }}{% else %}0{% endif %}%;" aria-valuenow="{% if accuracies.5|is_number %}{{ accuracies.5 }}{% else %}0{% endif %}" aria-valuemin="0" aria-valuemax="100">
+                                                {% if accuracies.5|is_number %}{{ accuracies.5 }}%{% else %}N/A{% endif %}
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <!-- Add more topics here with progress bars -->
+                                    <li>
+                                        Topic Name 6
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: {% if accuracies.6|is_number %}{{ accuracies.6 }}{% else %}0{% endif %}%;" aria-valuenow="{% if accuracies.6|is_number %}{{ accuracies.6 }}{% else %}0{% endif %}" aria-valuemin="0" aria-valuemax="100">
+                                                {% if accuracies.6|is_number %}{{ accuracies.6 }}%{% else %}N/A{% endif %}
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <!-- Add more topics here with progress bars -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

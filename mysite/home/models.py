@@ -63,6 +63,40 @@ class CustomUser(AbstractUser):
 
     last_task = models.ForeignKey('Task', related_name='user_last_task', on_delete=models.CASCADE, null=True, blank=True)
 
+    def get_accuracy_and_lowest_topic(self):
+        accuracies = {}
+        min_accuracy = 100
+        topic_with_lowest_accuracy = None
+        theme_names = {1: 'Caracteristicas de la onda', 2: 'Ondas Sonoras', 3: 'Ondas Armonicas', 4: 'Ecuacion de la Onda', 5: 'Energias e info. transferida'}
+        for theme in range(1, 6):  # Assuming themes are numbered from 1 to 5
+            total = self.user_score[f'level{theme}']['wrongs'] + self.user_score[f'level{theme}']['correct']
+            if total == 0:
+                accuracies[theme] = "Not enough info"
+            else:
+                accuracy = (self.user_score[f'level{theme}']['correct'] / total) * 100
+                accuracies[theme] = accuracy
+                if accuracy < min_accuracy:
+                    min_accuracy = accuracy
+                    topic_with_lowest_accuracy = theme_names[theme]
+
+        if topic_with_lowest_accuracy is None:
+            topic_with_lowest_accuracy = "Not enough info"
+
+        return topic_with_lowest_accuracy
+
+    def get_time_per_task(self):
+        print("TOTALTIMESPTEN")
+        print(type(self.total_time_spent))
+        total_time = self.total_time_spent.total_seconds()/60
+        return total_time/int(self.user_score['tasks'])
+
+    def get_time_per_level(self):
+        total_time = self.total_time_spent.total_seconds()/60
+        level =  int(self.json_user['theme'])
+        return level/total_time
+    
+
+
 class Task(BaseModel):
     tries = {
         'first_try_answered': False,
@@ -105,6 +139,10 @@ class Task(BaseModel):
             question_query = Q(difficulty=2) & Q(theme=theme)
             question = DinamicQuestion.objects.filter(question_query).order_by('?').first()
             return question
+
+
+
+
 
 # ===================== MCQ =====================
 class Question(BaseModel):
