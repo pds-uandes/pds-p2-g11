@@ -143,33 +143,6 @@ def home(request):
 
 # ================================================ STUDENT ====================================================================
 @teacher_required
-def students_data(request, student_id):
-    students = CustomUser.objects.all()
-    theme_names = {1: 'Caracteristicas de la onda', 2: 'Ondas Sonoras', 3: 'Ondas Armonicas', 4: 'Ecuacion de la Onda', 5: 'Energias e info. transferida'}
-    theme_totals = {theme: {'total': 0, 'count': 0} for theme in theme_names.values()}
-    
-    for student in students:
-        for theme in range(1, 6):  # Assuming themes are numbered from 1 to 5
-            total = student.user_score[f'level{theme}']['wrongs'] + student.user_score[f'level{theme}']['correct']
-            if total > 0:
-                accuracy = (student.user_score[f'level{theme}']['correct'] / total) * 100
-                theme_totals[theme_names[theme]]['total'] += accuracy
-                theme_totals[theme_names[theme]]['count'] += 1
-
-    average_accuracies = {theme: "Not enough info" if data['count'] == 0 else data['total'] / data['count'] for theme, data in theme_totals.items()}
-
-    # Get the single student
-    single_student = get_object_or_404(CustomUser, pk=student_id)
-    single_student_accuracies = {}
-    for theme in range(1, 6):
-        total = single_student.user_score[f'level{theme}']['wrongs'] + single_student.user_score[f'level{theme}']['correct']
-        if total == 0:
-            single_student_accuracies[theme_names[theme]] = "Not enough info"
-        else:
-            single_student_accuracies[theme_names[theme]] = (single_student.user_score[f'level{theme}']['correct'] / total) * 100
-
-    return render(request, 'student_profile.html', {'student': single_student, 'average_accuracies': average_accuracies, 'single_student_accuracies': single_student_accuracies})
-
 def student_profile(request, student_id):
     student = get_object_or_404(CustomUser, pk=student_id)
     if student.last_login_time and student.last_logout_time:
@@ -319,6 +292,10 @@ def do_task(request):
         if len(task.wrongs) == 0:
             request.user.json_user['difficulty'] += 1
             request.user.save()
+
+            #Agregamos task al usuario
+            
+        request.user.last_task = task
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': True})
 
 
@@ -395,11 +372,11 @@ def redo_task(request):
     task.save()
     if task.score == 1:
         request.user.json_user['difficulty'] += 1
-        print("ola")
         print(request.user.json_user)
         request.user.save()
 
     if task.wrongs_counter >= len(task.wrongs_permanent):
+        request.user.last_task = task
         return render(request, 'results.html', {'questions': task.questions, 'score': task.score, 'wrongs': task.wrongs, 'redo': False})
 
     return render(request, 'new_quiz.html', {'question': task.wrongs_permanent[task.wrongs_counter], 'counter': task.wrongs_counter + 1, 'redo': False, 'hide_answer': task.wrongs_permanent[task.wrongs_counter].user_answer, 'total_wrongs': len(task.wrongs_permanent)})
@@ -539,6 +516,7 @@ def do_dinamic_task(request):
             request.user.json_user['difficulty'] = 1
             request.user.json_user['theme'] += 1
             request.user.save()
+        request.user.last_task = task
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
 
     nuer_of_answers =  DinamicAnswer.objects.filter(question=task.questions[-1])
@@ -598,6 +576,8 @@ def redo_dinamic_task(request):
             request.user.json_user['difficulty'] = 1
             request.user.json_user['theme'] += 1
             request.user.save()
+            
+        request.user.last_task = task
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
 
 

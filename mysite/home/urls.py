@@ -25,6 +25,5 @@ urlpatterns = [
     path('dinamic_task/', views.do_dinamic_task, name='do_dinamic_task'),
     path('dinamic_results/', views.results, name='dinamic_results'),
     path('redo_dinamic_task/', views.redo_dinamic_task, name='redo_dinamic_task'),
-    path('students_data/', views.students_data, name='students_data'),
     ]
 

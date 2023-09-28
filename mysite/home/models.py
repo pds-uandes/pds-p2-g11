@@ -61,6 +61,7 @@ class CustomUser(AbstractUser):
     json_user = models.JSONField(default=JSON_FIELD_USER)
     user_score = models.JSONField(default=JSON_FIELD_SCORE)
 
+    last_task = models.ForeignKey('Task', related_name='user_last_task', on_delete=models.CASCADE, null=True, blank=True)
 
 class Task(BaseModel):
     tries = {
@@ -240,7 +241,7 @@ class DinamicAnswer(BaseModel):
 
     metrics = models.CharField(max_length=100)
     equation = models.CharField(max_length=1000, blank=True)
-    hint = models.CharField(max_length=200)
+    hint = models.CharField(max_length=200, blank=True)
     user_answer = 0
 
     def __str__(self) -> str:
