@@ -27,7 +27,7 @@
                 
                 <p><strong>Usage Time:</strong> {{student.total_time_spent }} </p>
                 <p><strong>Last Login:</strong> {{student.last_login_time}}</p>
-                <p><strong>Worst Topic:</strong> {{ topic_with_lowest_accuracy }} minutes</p>
+                <p><strong>Worst Topic:</strong> {{ topic_with_lowest_accuracy }}</p>
                 <p><strong>Time per task:</strong> {{ student.get_time_per_task|floatformat:"-2" }} minutes</p>
                 <p><strong>Time per level:</strong> {{ student.get_time_per_level|floatformat:"-2" }} minutes</p>
                 {% if student.get_time_relative > 0 %}
