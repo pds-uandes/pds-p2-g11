@@ -322,7 +322,7 @@ def do_task(request):
                 print("The selected answer is INCORRECT.")
         task.save()
 
-    if task.counter >= 1:
+    if task.counter >= 3:
 
         if len(task.wrongs) == 0:
             request.user.json_user['difficulty'] += 1
