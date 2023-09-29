@@ -530,7 +530,6 @@ def do_dinamic_task(request):
                 user_answer = float(request.POST.get(f'userAnswer{i+1}'))
                 print(f"User answer {a}: {user_answer}")
                 a.user_answer = user_answer
-                
                 a.save()
                 if user_answer >= res[0] and user_answer <= res[1]:
                     print(f"Range: {res[0]} - {res[1]}")
@@ -550,13 +549,18 @@ def do_dinamic_task(request):
         if task.wrongs:
             return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': True, 'answers': answers})
 
-        if request.user.json_user['difficulty'] < 5:
+        if request.user.json_user['difficulty'] < 5 and request.user.json_user['theme'] < 5:
             request.user.json_user['difficulty'] += 1
             request.user.save()
-        else:
+        elif request.user.json_user['difficulty'] == 5 and request.user.json_user['theme'] < 5:
             request.user.json_user['difficulty'] = 1
             request.user.json_user['theme'] += 1
             request.user.save()
+        else:
+            request.user.json_user['difficulty'] = 1
+            request.user.json_user['theme'] = 1
+            request.user.save()
+
         request.user.last_task = task
         request.user.save()
         return render(request, 'dinamic_results.html', {'question': task.questions[-1], 'score': task.score, 'wrongs': task.wrongs, 'redo': False, 'answers': answers})
@@ -600,10 +604,10 @@ def redo_dinamic_task(request):
             for i,a in enumerate(answers):
                 res = a.get_result()
                 user_answer = float(request.POST.get(f'userAnswer{i+1}'))
+                a.user_answer = user_answer
+                a.save()
                 if user_answer >= res[0] and user_answer <= res[1]:
                     task.score += 1
-                    a.user_answer = user_answer
-                    a.save()
                     question.wrong_answers.remove(a)
                     #Sumamos en el score del usuario
                     request.user.user_score[get_theme(question.theme)]['correct'] += 1
@@ -611,12 +615,16 @@ def redo_dinamic_task(request):
                     request.user.save()
                     #---------------------#
 
-        if request.user.json_user['difficulty'] < 5:
+        if request.user.json_user['difficulty'] < 5 and request.user.json_user['theme'] < 5:
             request.user.json_user['difficulty'] += 1
+            request.user.save()
+        elif request.user.json_user['difficulty'] == 5 and request.user.json_user['theme'] < 5:
+            request.user.json_user['difficulty'] = 1
+            request.user.json_user['theme'] += 1
             request.user.save()
         else:
             request.user.json_user['difficulty'] = 1
-            request.user.json_user['theme'] += 1
+            request.user.json_user['theme'] = 1
             request.user.save()
             
         request.user.last_task = task
